@@ -22,12 +22,15 @@ var paths = {
 		src: './src/css/*',
 		dest: './dist/css'
 	},
+	libs: {
+		src: ['./node_modules/normalize-css/normalize.css'],
+		dest: './dist/libs'
+	},
 	static: {
 		src: './src/static/*',
 		dest: './dist/static'
 	}
 };
-
 
 gulp.task('web-pages', function() {
 	return gulp.src(paths.webpages.src, {base: './src'})
@@ -42,6 +45,12 @@ gulp.task('Less', function() {
 		.pipe(gulp.dest(paths.less.dest));
 });
 
+gulp.task('libs', function() {
+	return gulp.src(paths.libs.src)
+		.pipe(changed(paths.libs.dest))
+		.pipe(gulp.dest(paths.libs.dest));
+});
+
 gulp.task('browserify', function() {
 	gulp.src('src/js/main.js')
 		.pipe(browserify({
@@ -52,4 +61,4 @@ gulp.task('browserify', function() {
 	;
 });
 
-gulp.task('default', ['web-pages', 'Less', 'browserify']);
+gulp.task('default', ['web-pages', 'Less', 'libs', 'browserify']);
