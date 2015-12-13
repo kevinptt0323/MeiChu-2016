@@ -1,4 +1,4 @@
-@z-index-order: 'index', 'activities';
+@z-index-order: 'index', 'activities', 'nav';
 
 .zindex(@elementName, @delta: 0) {
 	.loop(@elementName, @counter) when (@counter > 0) {
@@ -17,6 +17,10 @@ body {
 
 .ui.white.header {
 	color: #fff;
+}
+
+nav.ui.fixed.menu {
+	.zindex('nav');
 }
 
 .index {
