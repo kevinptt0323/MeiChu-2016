@@ -17,6 +17,7 @@
   "license": "MIT",
   "dependencies": {
     "better-console": "^0.2.4",
+    "browserify-shim": "^3.8.11",
     "del": "^2.2.0",
     "extend": "^3.0.0",
     "gulp": "^3.9.0",
@@ -44,12 +45,14 @@
     "gulp-uglify": "^1.5.1",
     "gulp-util": "^3.0.7",
     "gulp-watch": "^4.3.5",
+    "jquery": "^2.1.4",
     "map-stream": "0.0.6",
     "normalize-css": "^2.3.1",
     "require-dot-file": "^0.4.0",
     "run-sequence": "^1.1.5",
     "semantic-ui": "^2.1.6",
     "skrollr": "^0.6.26",
+    "skrollr-menu": "github:prinzhorn/skrollr-menu",
     "yamljs": "^0.2.4"
   }
 }

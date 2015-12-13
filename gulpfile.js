@@ -58,8 +58,17 @@ gulp.task('libs', function() {
 gulp.task('browserify', function() {
 	gulp.src('src/js/main.js')
 		.pipe(browserify({
-			insertGlobals : true,
-			debug : !gulp.env.production
+			insertGlobals: true,
+			debug: !gulp.env.production,
+			shim: {
+				'skrollr-menu': {
+					path: './node_modules/skrollr-menu/dist/skrollr.menu.min.js',
+					exports: 'skrollr_menu',
+					depends: {
+						skrollr: 'skrollr'
+					}
+				}
+			}
 		}))
 		.pipe(gulp.dest('dist/js'))
 	;
