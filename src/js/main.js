@@ -5,3 +5,9 @@ var s = skrollr.init({
 		return false;
 	}
 });
+
+var scrollTo = function(id) {
+	console.log(id);
+	s.animateTo(400);
+	return false;
+}
