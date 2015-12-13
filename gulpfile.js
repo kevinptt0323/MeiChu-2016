@@ -23,7 +23,11 @@ var paths = {
 		dest: './dist/css'
 	},
 	libs: {
-		src: ['./node_modules/normalize-css/normalize.css'],
+		src: [
+			'./node_modules/normalize-css/normalize.css',
+			'./node_modules/semantic-ui/dist/semantic.min.js',
+			'./node_modules/semantic-ui/dist/semantic.min.css'
+		],
 		dest: './dist/libs'
 	},
 	static: {

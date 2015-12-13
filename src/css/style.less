@@ -9,7 +9,14 @@
 	.pickIndex(@elementName, @counter) when (extract(@z-index-order, @counter) = @elementName) {
 		z-index: @counter * 100 + @delta;
 	}
+}
 
+body {
+	font-size: 2em;
+}
+
+.ui.white.header {
+	color: #fff;
 }
 
 .index {
