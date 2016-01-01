@@ -2,7 +2,8 @@ var
 	gulp        = require('gulp'),
 	less        = require('gulp-less'),
 	changed     = require('gulp-changed'),
-	browserify  = require('gulp-browserify')
+	browserify  = require('gulp-browserify'),
+	reactify    = require('reactify')
 ;
 
 var paths = {
@@ -69,6 +70,15 @@ gulp.task('browserify', function() {
 					}
 				}
 			}
+		}))
+		.pipe(gulp.dest('dist/js'))
+	;
+	gulp.src('src/js/shop.js')
+		.pipe(changed('dist/js'))
+		.pipe(browserify({
+			insertGlobals : true,
+			debug : !gulp.env.production,
+			transform: [reactify]
 		}))
 		.pipe(gulp.dest('dist/js'))
 	;
