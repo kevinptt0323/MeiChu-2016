@@ -16,6 +16,9 @@
   "author": "Kevin Lin",
   "license": "MIT",
   "dependencies": {
+    "babel-preset-es2015": "^6.3.13",
+    "babel-preset-react": "^6.3.13",
+    "babelify": "^7.2.0",
     "better-console": "^0.2.4",
     "browserify-shim": "^3.8.11",
     "del": "^2.2.0",
@@ -53,7 +56,6 @@
     "react": "^0.14.5",
     "react-dom": "^0.14.5",
     "react-tap-event-plugin": "^0.2.1",
-    "reactify": "^1.1.1",
     "require-dot-file": "^0.4.0",
     "run-sequence": "^1.1.5",
     "semantic-ui": "^2.1.6",

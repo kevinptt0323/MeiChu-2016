@@ -3,7 +3,7 @@ var
 	less        = require('gulp-less'),
 	changed     = require('gulp-changed'),
 	browserify  = require('gulp-browserify'),
-	reactify    = require('reactify')
+	babelify    = require('babelify')
 ;
 
 var paths = {
@@ -76,9 +76,9 @@ gulp.task('browserify', function() {
 	gulp.src('src/js/shop.js')
 		.pipe(changed('dist/js'))
 		.pipe(browserify({
-			insertGlobals : true,
-			debug : !gulp.env.production,
-			transform: [reactify]
+			insertGlobals: true,
+			debug: !gulp.env.production,
+			transform: [babelify]
 		}))
 		.pipe(gulp.dest('dist/js'))
 	;
