@@ -93,7 +93,7 @@ export default class MyShop extends React.Component {
 			<div>
 				<Cart />
 				<div className="content">
-					<AppBar title="梅後商城" />
+					<AppBar title="梅後商城" style={{position: "fixed"}} />
 					<Goods />
 				</div>
 			</div>
