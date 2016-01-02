@@ -168,11 +168,11 @@ export default class Goods extends React.Component {
 	render() {
 		let actions = [
 			<FlatButton
-				label="購買"
+				label="加入購物車"
 				secondary={true}
 				onTouchTap={this._onAddClick.bind(this, this.state.showID)} />,
 			<FlatButton
-				label="取消"
+				label="關閉"
 				onTouchTap={this.hideDialog.bind(this)} />,
 		];
 		let currGood = this.state.goods.filter(good => (good.id==this.state.showID))[0];
