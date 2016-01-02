@@ -108,7 +108,7 @@ export default class CartSummary extends React.Component {
 export default class Goods extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {cols: 4, open: false, goods: []};
+		this.state = {cols: 4, open: false, showID: 0, goods: [{id: 0, name: "", description: ""}]};
 
 		$.ajax({
 			url: props.goodsAPI,
@@ -123,8 +123,8 @@ export default class Goods extends React.Component {
 			}.bind(this)
 		});
 	}
-	showDialog(e) {
-		this.setState({open: true});
+	showDialog(id) {
+		this.setState({open: true, showID: id});
 	}
 	hideDialog() {
 		this.setState({open: false});
@@ -138,15 +138,14 @@ export default class Goods extends React.Component {
 		let data = [1,2,3,4,5,6,7,8,9,10];
 		const actions = [
 			<FlatButton
-				label="Cancel"
+				label="購買"
 				secondary={true}
-				onTouchTap={this.hideDialog.bind(this)} />,
+				onTouchTap={this._onAddClick.bind(this, this.state.showID)} />,
 			<FlatButton
-				label="Submit"
-				primary={true}
-				keyboardFocused={true}
+				label="取消"
 				onTouchTap={this.hideDialog.bind(this)} />,
 		];
+		let currGood = this.state.goods[this.state.showID];
 		return (
 			<div className={this.props.className}>
 				<GridList cellHeight={270} cols={this.state.cols} padding={2}>
@@ -167,7 +166,7 @@ export default class Goods extends React.Component {
 								actionIcon={<IconButton onTouchTap={this._onAddClick.bind(this, good.id)}><ContentAdd color="white"/></IconButton>}
 								cols={cols} rows={rows}
 								titleBackground={gradientBg}
-								onTouchTap={this.showDialog.bind(this)}
+								onTouchTap={this.showDialog.bind(this, good.id)}
 								>
 								<div className="img" style={{backgroundImage: "url(" + good.src + ")"}}></div>
 							</GridTile>
@@ -175,12 +174,12 @@ export default class Goods extends React.Component {
 					})}
 				</GridList>
 				<Dialog
-					title="Dialog With Actions"
+					title={currGood.name}
 					actions={actions}
 					modal={false}
 					open={this.state.open}
 					onRequestClose={this.hideDialog.bind(this)}>
-					The actions in this window were passed in as an array of react objects.
+					{currGood.description}
 				</Dialog>
 			</div>
 		);
