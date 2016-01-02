@@ -6,6 +6,7 @@ import update from 'react-addons-update';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 
 import AppBar           from 'material-ui/lib/app-bar';
+import Colors           from 'material-ui/lib/styles/colors';
 import Dialog           from 'material-ui/lib/dialog';
 import Divider          from 'material-ui/lib/divider';
 import FlatButton       from 'material-ui/lib/flat-button';
@@ -33,16 +34,19 @@ const API = {
 export default class Cart extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {open: true, list: []};
+		this.state = {open: true, list: [], totalPrice: 0};
 	}
 	toggle() {
 		this.setState({open: !this.state.open});
 	}
+	updatePrice() {
+		this.setState({ totalPrice: this.state.list.reduce((a, b) => a+(b.special||b.price), 0) });
+	}
 	add(good) {
-		this.setState({ list: update(this.state.list, {$push: [good]}) });
+		this.setState({ list: update(this.state.list, {$push: [good]}) }, this.updatePrice);
 	}
 	remove(index) {
-		this.setState({ list: update(this.state.list, {$splice: [[index, 1]]}) });
+		this.setState({ list: update(this.state.list, {$splice: [[index, 1]]}) }, this.updatePrice);
 	}
 	render() {
 		return (
@@ -53,7 +57,7 @@ export default class Cart extends React.Component {
 						><NavigationClose /></IconButton>}
 					title="購物車" />
 				<CartList list={this.state.list} handleRemove={this.remove.bind(this)} />
-				<CartSummary />
+				<CartSummary totalPrice={this.state.totalPrice} />
 			</SideNav>
 		);
 	}
@@ -75,13 +79,13 @@ export default class CartList extends React.Component {
 					key={index+".0"}
 					rightIconButton={<IconButton onTouchTap={this._onRemoveClick.bind(this, index)}><ContentClear /></IconButton>}
 					primaryText={good.name}
-					secondaryText={good.price}
+					secondaryText={good.special || good.price}
 				/>
 			);
 			cartList.push(<Divider key={index+".1"}/>);
 		});
 		return (
-			<List>
+			<List className="cart-list">
 				{ cartList }
 			</List>
 		);
@@ -93,7 +97,11 @@ export default class CartSummary extends React.Component {
 		super(props);
 	}
 	render() {
-		return (<div></div>);
+		return (
+			<Paper zDepth={3} className="cart-summary">
+				總價：<span style={{color: Colors.cyan500}}>{this.props.totalPrice}</span>
+			</Paper>
+		);
 	}
 }
 
