@@ -63,12 +63,13 @@ export default class CartList extends React.Component {
 		this.props.list.forEach((good, index) => {
 			cartList.push(
 				<ListItem
+					key={index+".0"}
 					rightIcon={<ContentClear />}
 					primaryText={good.name}
 					secondaryText={good.price}
 				/>
 			);
-			cartList.push(<Divider />);
+			cartList.push(<Divider key={index+".1"}/>);
 		});
 		return (
 			<List>
@@ -132,7 +133,7 @@ export default class Goods extends React.Component {
 		return (
 			<div className={this.props.className}>
 				<GridList cellHeight={300} cols={this.state.cols} padding={2}>
-					{this.state.goods.map(good => {
+					{this.state.goods.map((good, index) => {
 						let cols = 1, rows = 1;
 						let gradientBg = 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)';
 						if (good.id===3)
@@ -140,7 +141,8 @@ export default class Goods extends React.Component {
 						if (good.id==4)
 							rows = 2;
 						return (
-							<GridTile className="grid-tile" title={good.name} subtitle={good.description}
+							<GridTile className="grid-tile" key={index}
+								title={good.name} subtitle={good.description}
 								actionIcon={<IconButton onTouchTap={this._onAddClick.bind(this, good.id)}><ContentAdd color="white"/></IconButton>}
 								cols={cols} rows={rows}
 								titleBackground={gradientBg}
