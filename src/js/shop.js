@@ -108,7 +108,7 @@ export default class CartSummary extends React.Component {
 export default class Goods extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {cols: 4, open: false, showID: 0, goods: [{id: 0, name: "", description: ""}]};
+		this.state = {cols: 4, open: false, showID: 1, goods: [{id: 1, name: "", src: "", description: ""}]};
 
 		$.ajax({
 			url: props.goodsAPI,
@@ -136,7 +136,7 @@ export default class Goods extends React.Component {
 	}
 	render() {
 		let data = [1,2,3,4,5,6,7,8,9,10];
-		const actions = [
+		let actions = [
 			<FlatButton
 				label="購買"
 				secondary={true}
@@ -145,7 +145,7 @@ export default class Goods extends React.Component {
 				label="取消"
 				onTouchTap={this.hideDialog.bind(this)} />,
 		];
-		let currGood = this.state.goods[this.state.showID];
+		let currGood = this.state.goods.filter(good => (good.id==this.state.showID))[0];
 		return (
 			<div className={this.props.className}>
 				<GridList cellHeight={270} cols={this.state.cols} padding={2}>
@@ -174,12 +174,18 @@ export default class Goods extends React.Component {
 					})}
 				</GridList>
 				<Dialog
+					className="dialog"
 					title={currGood.name}
+					width="85%"
 					actions={actions}
 					modal={false}
 					open={this.state.open}
+					autoScrollBodyContent={true}
 					onRequestClose={this.hideDialog.bind(this)}>
-					{currGood.description}
+					<div className="flex-box">
+						<div className="flex-item flex-item-1"> <img src={currGood.src} /> </div>
+						<div className="flex-item flex-item-1" dangerouslySetInnerHTML={{__html: currGood.description}}></div>
+					</div>
 				</Dialog>
 			</div>
 		);
