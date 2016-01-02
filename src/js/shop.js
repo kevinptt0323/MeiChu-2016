@@ -31,10 +31,13 @@ const API = {
 export default class Cart extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {open: true};
+		this.state = {open: true, list: []};
 	}
 	toggle() {
 		this.setState({open: !this.state.open});
+	}
+	add(good) {
+		this.setState({list: this.state.list.concat([good])});
 	}
 	render() {
 		return (
@@ -44,7 +47,7 @@ export default class Cart extends React.Component {
 						onTouchTap={this.toggle.bind(this)}
 						><NavigationClose /></IconButton>}
 					title="購物車" />
-				<CartList />
+				<CartList list={this.state.list} />
 				<CartSummary />
 			</SideNav>
 		);
@@ -56,25 +59,20 @@ export default class CartList extends React.Component {
 		super(props);
 	}
 	render() {
+		let cartList = [];
+		this.props.list.forEach((good, index) => {
+			cartList.push(
+				<ListItem
+					rightIcon={<ContentClear />}
+					primaryText={good.name}
+					secondaryText={good.price}
+				/>
+			);
+			cartList.push(<Divider />);
+		});
 		return (
 			<List>
-				<ListItem
-					rightIcon={<ContentClear />}
-					primaryText="商品一"
-					secondaryText="$100"
-				/>
-				<Divider />
-				<ListItem
-					rightIcon={<ContentClear />}
-					primaryText="商品二"
-					secondaryText="$200"
-				/>
-				<Divider />
-				<ListItem
-					rightIcon={<ContentClear />}
-					primaryText="商品三"
-					secondaryText="$300000000"
-				/>
+				{ cartList }
 			</List>
 		);
 	}
@@ -107,11 +105,16 @@ export default class Goods extends React.Component {
 			}.bind(this)
 		});
 	}
-	showDialog() {
+	showDialog(e) {
 		this.setState({open: true});
 	}
 	hideDialog() {
 		this.setState({open: false});
+	}
+	_onAddClick(id, e) {
+		let toAdd = this.state.goods.filter(good => (good.id==id));
+		this.props.handleAdd(toAdd[0]);
+		e.stopPropagation();
 	}
 	render() {
 		let data = [1,2,3,4,5,6,7,8,9,10];
@@ -138,7 +141,7 @@ export default class Goods extends React.Component {
 							rows = 2;
 						return (
 							<GridTile className="grid-tile" title={good.name} subtitle={good.description}
-								actionIcon={<IconButton><ContentAdd color="white"/></IconButton>}
+								actionIcon={<IconButton onTouchTap={this._onAddClick.bind(this, good.id)}><ContentAdd color="white"/></IconButton>}
 								cols={cols} rows={rows}
 								titleBackground={gradientBg}
 								onTouchTap={this.showDialog.bind(this)}
@@ -166,15 +169,18 @@ export default class MyShop extends React.Component {
 		super(props);
 	}
 	toggleCart() {
-		this.refs.cartNav.toggle();
+		this.refs.cart.toggle();
+	}
+	addToCart(good) {
+		this.refs.cart.add(good);
 	}
 	render() {
 		return (
 			<div>
-				<Cart ref="cartNav" />
+				<Cart ref="cart" />
 				<div className="content">
 					<AppBar iconElementRight={<IconButton onTouchTap={this.toggleCart.bind(this)}><ShoppingCart /></IconButton>} title="梅後商城" style={{position: "fixed"}} />
-					<Goods className="Goods" goodsAPI={API.Goods} />
+					<Goods className="Goods" goodsAPI={API.Goods} handleAdd={this.addToCart.bind(this)}/>
 				</div>
 			</div>
 		);
