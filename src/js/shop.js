@@ -85,7 +85,7 @@ export default class CartList extends React.Component {
 		let getNestedList = (arr) => {
 		};
 		this.props.list.forEach((good, index) => {
-			if (good.child) {
+			if (good.childObj) {
 				cartList.push(
 					<ListItem
 						key={index+".0"}
@@ -93,8 +93,8 @@ export default class CartList extends React.Component {
 						primaryText={good.name}
 						secondaryText={good.special || good.price}
 						initiallyOpen={true}
-						nestedItems={good.child.map((sub_good, sub_index) => (
-							<ListItem key={index+".0."+sub_index} primaryText={sub_good.name} style={{fontSize: "1rem"}}/>
+						nestedItems={good.childObj.map((sub_good, sub_index) => (
+							<ListItem key={index+".0."+sub_index} primaryText={sub_good.name} />
 						))}
 					/>
 				);
@@ -161,12 +161,11 @@ export default class Goods extends React.Component {
 	}
 	_onAddClick(id, e) {
 		let toAdd = this.getGoodByID(id);
-		toAdd.child = toAdd.child ? toAdd.child.map(this.getGoodByID.bind(this)) : [];
+		toAdd.childObj = toAdd.child ? toAdd.child.map(this.getGoodByID.bind(this)) : [];
 		this.props.handleAdd(toAdd);
 		e.stopPropagation();
 	}
 	render() {
-		console.log("re-render");
 		let actions = [
 			<FlatButton
 				label="購買"
