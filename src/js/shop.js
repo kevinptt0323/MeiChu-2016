@@ -5,26 +5,28 @@ import ReactDOM from 'react-dom';
 import update from 'react-addons-update';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 
-import AppBar           from 'material-ui/lib/app-bar';
-import Colors           from 'material-ui/lib/styles/colors';
-import Dialog           from 'material-ui/lib/dialog';
-import Divider          from 'material-ui/lib/divider';
-import FlatButton       from 'material-ui/lib/flat-button';
-import GridList         from 'material-ui/lib/grid-list/grid-list';
-import GridTile         from 'material-ui/lib/grid-list/grid-tile';
-import IconButton       from 'material-ui/lib/icon-button';
-import List             from 'material-ui/lib/lists/list';
-import ListItem         from 'material-ui/lib/lists/list-item';
-import Paper            from 'material-ui/lib/paper';
-import SideNav          from 'material-ui/lib/left-nav';
-import RaisedButton     from 'material-ui/lib/raised-button';
-//import TextField        from 'material-ui/lib/text-field';
+import AppBar       from 'material-ui/lib/app-bar';
+import Colors       from 'material-ui/lib/styles/colors';
+import Dialog       from 'material-ui/lib/dialog';
+import Divider      from 'material-ui/lib/divider';
+import DropDownMenu from 'material-ui/lib/DropDownMenu';
+import FlatButton   from 'material-ui/lib/flat-button';
+import GridList     from 'material-ui/lib/grid-list/grid-list';
+import GridTile     from 'material-ui/lib/grid-list/grid-tile';
+import IconButton   from 'material-ui/lib/icon-button';
+import List         from 'material-ui/lib/lists/list';
+import ListItem     from 'material-ui/lib/lists/list-item';
+import MenuItem     from 'material-ui/lib/menus/menu-item';
+import Paper        from 'material-ui/lib/paper';
+import SideNav      from 'material-ui/lib/left-nav';
+import RaisedButton from 'material-ui/lib/raised-button';
+import TextField    from 'material-ui/lib/text-field';
 
-import StarBorder       from 'material-ui/lib/svg-icons/toggle/star-border';
-import NavigationClose  from 'material-ui/lib/svg-icons/navigation/close';
-import ContentAdd       from 'material-ui/lib/svg-icons/content/add';
-import ContentClear     from 'material-ui/lib/svg-icons/content/clear';
-import ShoppingCart     from 'material-ui/lib/svg-icons/action/shopping-cart';
+import StarBorder      from 'material-ui/lib/svg-icons/toggle/star-border';
+import NavigationClose from 'material-ui/lib/svg-icons/navigation/close';
+import ContentAdd      from 'material-ui/lib/svg-icons/content/add';
+import ContentClear    from 'material-ui/lib/svg-icons/content/clear';
+import ShoppingCart    from 'material-ui/lib/svg-icons/action/shopping-cart';
 
 const API = {
 	Goods: "/shop/api/goods"
@@ -155,7 +157,7 @@ export default class Goods extends React.Component {
 		let currGood = this.state.goods.filter(good => (good.id==this.state.showID))[0];
 		return (
 			<div className={this.props.className}>
-				<GridList cellHeight={270} cols={this.props.mobile?1:4} padding={2}>
+				<GridList cellHeight={238} cols={this.props.mobile?1:4} padding={2}>
 					{this.state.goods.map((good, index) => {
 						let cols = 1, rows = 1;
 						let gradientBg = 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)';
