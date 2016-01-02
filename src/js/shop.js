@@ -131,6 +131,7 @@ export default class Goods extends React.Component {
 				<GridList cellHeight={300} cols={this.state.cols} padding={2}>
 					{this.state.goods.map(good => {
 						let cols = 1, rows = 1;
+						let gradientBg = 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)';
 						if (good.id===3)
 							cols = 2;
 						if (good.id==4)
@@ -139,6 +140,7 @@ export default class Goods extends React.Component {
 							<GridTile className="grid-tile" title={good.name} subtitle={good.description}
 								actionIcon={<IconButton><ContentAdd color="white"/></IconButton>}
 								cols={cols} rows={rows}
+								titleBackground={gradientBg}
 								onTouchTap={this.showDialog.bind(this)}
 								>
 								<div className="img" style={{backgroundImage: "url(" + good.src + ")"}}></div>
