@@ -34,10 +34,13 @@ const API = {
 export default class Cart extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {open: true, list: [], totalPrice: 0};
+		this.state = {open: !props.mobile, list: [], totalPrice: 0};
 	}
-	toggle() {
-		this.setState({open: !this.state.open});
+	toggle(val, e) {
+		if (val!=null)
+			this.setState({open: val});
+		else
+			this.setState({open: !this.state.open});
 	}
 	updatePrice() {
 		this.setState({ totalPrice: this.state.list.reduce((a, b) => a+(b.special||b.price), 0) });
@@ -50,10 +53,14 @@ export default class Cart extends React.Component {
 	}
 	render() {
 		return (
-			<SideNav width={300} openRight={true} open={this.state.open}>
+			<SideNav
+				width={300}
+				openRight={true} open={this.state.open}
+				docked={!this.props.mobile}
+				onRequestChange={open => this.setState({open})}>
 				<AppBar
 					iconElementLeft={<IconButton
-						onTouchTap={this.toggle.bind(this)}
+						onTouchTap={this.toggle.bind(this, null)}
 						><NavigationClose /></IconButton>}
 					title="購物車" />
 				<CartList list={this.state.list} handleRemove={this.remove.bind(this)} />
@@ -108,7 +115,7 @@ export default class CartSummary extends React.Component {
 export default class Goods extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {cols: 4, open: false, showID: 1, goods: [{id: 1, name: "", src: "", description: ""}]};
+		this.state = {open: false, showID: 1, goods: [{id: 1, name: "", src: "", description: ""}]};
 
 		$.ajax({
 			url: props.goodsAPI,
@@ -135,7 +142,7 @@ export default class Goods extends React.Component {
 		e.stopPropagation();
 	}
 	render() {
-		let data = [1,2,3,4,5,6,7,8,9,10];
+		console.log("re-render");
 		let actions = [
 			<FlatButton
 				label="購買"
@@ -148,16 +155,18 @@ export default class Goods extends React.Component {
 		let currGood = this.state.goods.filter(good => (good.id==this.state.showID))[0];
 		return (
 			<div className={this.props.className}>
-				<GridList cellHeight={270} cols={this.state.cols} padding={2}>
+				<GridList cellHeight={270} cols={this.props.mobile?1:4} padding={2}>
 					{this.state.goods.map((good, index) => {
 						let cols = 1, rows = 1;
 						let gradientBg = 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)';
-						if ([1, 2].indexOf(good.id)!=-1)
-							rows = cols = 2;
-						if ([5].indexOf(good.id)!=-1)
-							cols = 2;
-						if ([6].indexOf(good.id)!=-1)
-							cols = 3;
+						if (!this.props.mobile) {
+							if ([1, 2].indexOf(good.id)!=-1)
+								rows = cols = 2;
+							if ([5].indexOf(good.id)!=-1)
+								cols = 2;
+							if ([6].indexOf(good.id)!=-1)
+								cols = 3;
+						}
 						if ([8].indexOf(good.id)!=-1)
 							rows = 2;
 						return (
@@ -195,20 +204,33 @@ export default class Goods extends React.Component {
 export default class MyShop extends React.Component {
 	constructor(props) {
 		super(props);
+		this.state = {mobile: true};
 	}
-	toggleCart() {
-		this.refs.cart.toggle();
+	componentDidMount() {
+		window.addEventListener('resize', this._resize_mixin_callback.bind(this));
+		this._resize_mixin_callback();
 	}
-	addToCart(good) {
+	_resize_mixin_callback() {
+		let val = document.documentElement.clientWidth<960;
+		if (this.state.mobile!=val)
+			this.setState({mobile: val}, () => this.refs.cart.toggle(!this.state.mobile));
+	}
+	componentWillUnmount() {
+		window.removeEventListener('resize', this._resize_mixin_callback.bind(this));
+	}
+	toggleCart(e) {
+		this.refs.cart.toggle(null, e);
+	}
+	addToCart(good, e) {
 		this.refs.cart.add(good);
 	}
 	render() {
 		return (
 			<div>
-				<Cart ref="cart" />
+				<Cart ref="cart" mobile={this.state.mobile} />
 				<div className="content">
 					<AppBar iconElementRight={<IconButton onTouchTap={this.toggleCart.bind(this)}><ShoppingCart /></IconButton>} title="梅後商城" style={{position: "fixed"}} />
-					<Goods className="Goods" goodsAPI={API.Goods} handleAdd={this.addToCart.bind(this)}/>
+					<Goods className="Goods" goodsAPI={API.Goods} handleAdd={this.addToCart.bind(this)} mobile={this.state.mobile} />
 				</div>
 			</div>
 		);

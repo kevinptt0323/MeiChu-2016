@@ -1,23 +1,38 @@
-.content {
-	width: calc(~'100% - 300px');
-	min-width: 300px;
+@desktop:   ~"only screen and (min-width: 960px)";
+@tablet:    ~"only screen and (max-width: 959px)";
+
+
+@media @desktop {
+	.content {
+		width: calc(~'100% - 300px');
+	}
+	.flex-box {
+		display: flex;
+		flex-wrap: wrap;
+		.flex-item {
+			margin: 10px;
+			line-height: 1.5rem;
+			&-1 {
+				flex: 1 0 0;
+			}
+		}
+	}
+}
+@media @tablet {
+	.content {
+		width: 100%;
+	}
+	.flex-box {
+		display: flex;
+		flex-wrap: wrap;
+		.flex-item {
+			width: 100%;
+		}
+	}
 }
 
 .dialog img {
 	width: 100%;
-}
-
-.flex-box {
-	display: flex;
-	flex-wrap: wrap;
-	.flex-item {
-		min-width: 300px;
-		margin: 10px;
-		line-height: 1.5rem;
-		&-1 {
-			flex: 1 0 0;
-		}
-	}
 }
 
 .Goods {
