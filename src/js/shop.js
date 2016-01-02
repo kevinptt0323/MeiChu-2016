@@ -2,6 +2,7 @@
 import $ from 'jquery';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import update from 'react-addons-update';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 
 import AppBar           from 'material-ui/lib/app-bar';
@@ -37,7 +38,10 @@ export default class Cart extends React.Component {
 		this.setState({open: !this.state.open});
 	}
 	add(good) {
-		this.setState({list: this.state.list.concat([good])});
+		this.setState({ list: update(this.state.list, {$push: [good]}) });
+	}
+	remove(index) {
+		this.setState({ list: update(this.state.list, {$splice: [[index, 1]]}) });
 	}
 	render() {
 		return (
@@ -47,7 +51,7 @@ export default class Cart extends React.Component {
 						onTouchTap={this.toggle.bind(this)}
 						><NavigationClose /></IconButton>}
 					title="購物車" />
-				<CartList list={this.state.list} />
+				<CartList list={this.state.list} handleRemove={this.remove.bind(this)} />
 				<CartSummary />
 			</SideNav>
 		);
@@ -58,13 +62,17 @@ export default class CartList extends React.Component {
 	constructor(props) {
 		super(props);
 	}
+	_onRemoveClick(index, e) {
+		this.props.handleRemove(index);
+		e.stopPropagation();
+	}
 	render() {
 		let cartList = [];
 		this.props.list.forEach((good, index) => {
 			cartList.push(
 				<ListItem
 					key={index+".0"}
-					rightIcon={<ContentClear />}
+					rightIconButton={<IconButton onTouchTap={this._onRemoveClick.bind(this, index)}><ContentClear /></IconButton>}
 					primaryText={good.name}
 					secondaryText={good.price}
 				/>
