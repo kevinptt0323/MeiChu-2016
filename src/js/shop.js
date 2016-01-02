@@ -95,7 +95,7 @@ export default class Goods extends React.Component {
 		this.state = {cols: 4, open: false, goods: []};
 
 		$.ajax({
-			url: this.props.goodsAPI,
+			url: props.goodsAPI,
 			dataType: 'json',
 			success: function(data) {
 				this.setState({goods: data});
