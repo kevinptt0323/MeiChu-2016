@@ -23,6 +23,9 @@ import ContentAdd       from 'material-ui/lib/svg-icons/content/add';
 import ContentClear     from 'material-ui/lib/svg-icons/content/clear';
 import ShoppingCart     from 'material-ui/lib/svg-icons/action/shopping-cart';
 
+const API = {
+	Goods: "/shop/api/goods"
+};
 
 
 export default class Cart extends React.Component {
@@ -89,7 +92,20 @@ export default class CartSummary extends React.Component {
 export default class Goods extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {cols: 4, open: false};
+		this.state = {cols: 4, open: false, goods: []};
+
+		$.ajax({
+			url: this.props.goodsAPI,
+			dataType: 'json',
+			success: function(data) {
+				this.setState({goods: data});
+			}.bind(this),
+			error: function(xhr, status, err) {
+				//console.error(this.props.resultUrl, status, err.toString());
+			}.bind(this),
+			complete: function(a, b) {
+			}.bind(this)
+		});
 	}
 	showDialog() {
 		this.setState({open: true});
@@ -111,18 +127,24 @@ export default class Goods extends React.Component {
 				onTouchTap={this.hideDialog.bind(this)} />,
 		];
 		return (
-			<div>
+			<div className={this.props.className}>
 				<GridList cellHeight={300} cols={this.state.cols} padding={2}>
-					<GridTile title="7122" subtitle="by kevinptt"
-						actionIcon={<IconButton><ContentAdd color="white"/></IconButton>}
-						cols={2} rows={2}
-					></GridTile>
-					{data.map(tile => (
-						<GridTile title={tile} subtitle="by kevinptt"
-							actionIcon={<IconButton><ContentAdd color="white"/></IconButton>}
-							onTouchTap={this.showDialog.bind(this)}
-							></GridTile>
-					))}
+					{this.state.goods.map(good => {
+						let cols = 1, rows = 1;
+						if (good.id===3)
+							cols = 2;
+						if (good.id==4)
+							rows = 2;
+						return (
+							<GridTile className="grid-tile" title={good.name} subtitle={good.description}
+								actionIcon={<IconButton><ContentAdd color="white"/></IconButton>}
+								cols={cols} rows={rows}
+								onTouchTap={this.showDialog.bind(this)}
+								>
+								<div className="img" style={{backgroundImage: "url(" + good.src + ")"}}></div>
+							</GridTile>
+						);
+					})}
 				</GridList>
 				<Dialog
 					title="Dialog With Actions"
@@ -150,7 +172,7 @@ export default class MyShop extends React.Component {
 				<Cart ref="cartNav" />
 				<div className="content">
 					<AppBar iconElementRight={<IconButton onTouchTap={this.toggleCart.bind(this)}><ShoppingCart /></IconButton>} title="梅後商城" style={{position: "fixed"}} />
-					<Goods />
+					<Goods className="Goods" goodsAPI={API.Goods} />
 				</div>
 			</div>
 		);
