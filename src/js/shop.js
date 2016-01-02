@@ -14,6 +14,7 @@ import GridTile         from 'material-ui/lib/grid-list/grid-tile';
 import IconButton       from 'material-ui/lib/icon-button';
 import List             from 'material-ui/lib/lists/list';
 import ListItem         from 'material-ui/lib/lists/list-item';
+import Paper            from 'material-ui/lib/paper';
 import SideNav          from 'material-ui/lib/left-nav';
 import RaisedButton     from 'material-ui/lib/raised-button';
 //import TextField        from 'material-ui/lib/text-field';
@@ -140,17 +141,21 @@ export default class Goods extends React.Component {
 		];
 		return (
 			<div className={this.props.className}>
-				<GridList cellHeight={300} cols={this.state.cols} padding={2}>
+				<GridList cellHeight={270} cols={this.state.cols} padding={2}>
 					{this.state.goods.map((good, index) => {
 						let cols = 1, rows = 1;
 						let gradientBg = 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)';
-						if (good.id===3)
+						if ([1, 2].indexOf(good.id)!=-1)
+							rows = cols = 2;
+						if ([5].indexOf(good.id)!=-1)
 							cols = 2;
-						if (good.id==4)
+						if ([6].indexOf(good.id)!=-1)
+							cols = 3;
+						if ([8].indexOf(good.id)!=-1)
 							rows = 2;
 						return (
 							<GridTile className="grid-tile" key={index}
-								title={good.name} subtitle={good.description}
+								title={good.name}
 								actionIcon={<IconButton onTouchTap={this._onAddClick.bind(this, good.id)}><ContentAdd color="white"/></IconButton>}
 								cols={cols} rows={rows}
 								titleBackground={gradientBg}
