@@ -82,15 +82,32 @@ export default class CartList extends React.Component {
 	}
 	render() {
 		let cartList = [];
+		let getNestedList = (arr) => {
+		};
 		this.props.list.forEach((good, index) => {
-			cartList.push(
-				<ListItem
-					key={index+".0"}
-					rightIconButton={<IconButton onTouchTap={this._onRemoveClick.bind(this, index)}><ContentClear /></IconButton>}
-					primaryText={good.name}
-					secondaryText={good.special || good.price}
-				/>
-			);
+			if (good.child) {
+				cartList.push(
+					<ListItem
+						key={index+".0"}
+						rightIconButton={<IconButton onTouchTap={this._onRemoveClick.bind(this, index)}><ContentClear /></IconButton>}
+						primaryText={good.name}
+						secondaryText={good.special || good.price}
+						initiallyOpen={true}
+						nestedItems={good.child.map((sub_good, sub_index) => (
+							<ListItem key={index+".0."+sub_index} primaryText={sub_good.name} style={{fontSize: "1rem"}}/>
+						))}
+					/>
+				);
+			} else {
+				cartList.push(
+					<ListItem
+						key={index+".0"}
+						rightIconButton={<IconButton onTouchTap={this._onRemoveClick.bind(this, index)}><ContentClear /></IconButton>}
+						primaryText={good.name}
+						secondaryText={good.special || good.price}
+					/>
+				);
+			}
 			cartList.push(<Divider key={index+".1"}/>);
 		});
 		return (
@@ -132,6 +149,10 @@ export default class Goods extends React.Component {
 			}.bind(this)
 		});
 	}
+	getGoodByID(id) {
+		let ret = this.state.goods.filter(good => (good.id==id));
+		return ret ? ret[0] : {};
+	}
 	showDialog(id) {
 		this.setState({open: true, showID: id});
 	}
@@ -139,8 +160,9 @@ export default class Goods extends React.Component {
 		this.setState({open: false});
 	}
 	_onAddClick(id, e) {
-		let toAdd = this.state.goods.filter(good => (good.id==id));
-		this.props.handleAdd(toAdd[0]);
+		let toAdd = this.getGoodByID(id);
+		toAdd.child = toAdd.child ? toAdd.child.map(this.getGoodByID.bind(this)) : [];
+		this.props.handleAdd(toAdd);
 		e.stopPropagation();
 	}
 	render() {
