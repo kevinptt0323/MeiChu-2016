@@ -21,6 +21,8 @@ import StarBorder       from 'material-ui/lib/svg-icons/toggle/star-border';
 import NavigationClose  from 'material-ui/lib/svg-icons/navigation/close';
 import ContentAdd       from 'material-ui/lib/svg-icons/content/add';
 import ContentClear     from 'material-ui/lib/svg-icons/content/clear';
+import ShoppingCart     from 'material-ui/lib/svg-icons/action/shopping-cart';
+
 
 
 export default class Cart extends React.Component {
@@ -28,10 +30,17 @@ export default class Cart extends React.Component {
 		super(props);
 		this.state = {open: true};
 	}
+	toggle() {
+		this.setState({open: !this.state.open});
+	}
 	render() {
 		return (
 			<SideNav width={300} openRight={true} open={this.state.open}>
-				<AppBar iconElementLeft={<IconButton><NavigationClose /></IconButton>} title="購物車" />
+				<AppBar
+					iconElementLeft={<IconButton
+						onTouchTap={this.toggle.bind(this)}
+						><NavigationClose /></IconButton>}
+					title="購物車" />
 				<CartList />
 				<CartSummary />
 			</SideNav>
@@ -132,12 +141,15 @@ export default class MyShop extends React.Component {
 	constructor(props) {
 		super(props);
 	}
+	toggleCart() {
+		this.refs.cartNav.toggle();
+	}
 	render() {
 		return (
 			<div>
-				<Cart />
+				<Cart ref="cartNav" />
 				<div className="content">
-					<AppBar title="梅後商城" style={{position: "fixed"}} />
+					<AppBar iconElementRight={<IconButton onTouchTap={this.toggleCart.bind(this)}><ShoppingCart /></IconButton>} title="梅後商城" style={{position: "fixed"}} />
 					<Goods />
 				</div>
 			</div>
