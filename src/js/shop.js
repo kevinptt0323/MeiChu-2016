@@ -5,19 +5,23 @@ import ReactDOM from 'react-dom';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 
 import AppBar           from 'material-ui/lib/app-bar';
-import CircularProgress from 'material-ui/lib/circular-progress';
 import Dialog           from 'material-ui/lib/dialog';
+import Divider          from 'material-ui/lib/divider';
 import FlatButton       from 'material-ui/lib/flat-button';
 import GridList         from 'material-ui/lib/grid-list/grid-list';
 import GridTile         from 'material-ui/lib/grid-list/grid-tile';
 import IconButton       from 'material-ui/lib/icon-button';
+import List             from 'material-ui/lib/lists/list';
+import ListItem         from 'material-ui/lib/lists/list-item';
 import SideNav          from 'material-ui/lib/left-nav';
-import Paper            from 'material-ui/lib/paper';
 import RaisedButton     from 'material-ui/lib/raised-button';
-import TextField        from 'material-ui/lib/text-field';
+//import TextField        from 'material-ui/lib/text-field';
 
 import StarBorder       from 'material-ui/lib/svg-icons/toggle/star-border';
 import NavigationClose  from 'material-ui/lib/svg-icons/navigation/close';
+import ContentAdd       from 'material-ui/lib/svg-icons/content/add';
+import ContentClear     from 'material-ui/lib/svg-icons/content/clear';
+
 
 export default class Cart extends React.Component {
 	constructor(props) {
@@ -28,8 +32,48 @@ export default class Cart extends React.Component {
 		return (
 			<SideNav width={300} openRight={true} open={this.state.open}>
 				<AppBar iconElementLeft={<IconButton><NavigationClose /></IconButton>} title="購物車" />
+				<CartList />
+				<CartSummary />
 			</SideNav>
 		);
+	}
+}
+
+export default class CartList extends React.Component {
+	constructor(props) {
+		super(props);
+	}
+	render() {
+		return (
+			<List>
+				<ListItem
+					rightIcon={<ContentClear />}
+					primaryText="商品一"
+					secondaryText="$100"
+				/>
+				<Divider />
+				<ListItem
+					rightIcon={<ContentClear />}
+					primaryText="商品二"
+					secondaryText="$200"
+				/>
+				<Divider />
+				<ListItem
+					rightIcon={<ContentClear />}
+					primaryText="商品三"
+					secondaryText="$300000000"
+				/>
+			</List>
+		);
+	}
+}
+
+export default class CartSummary extends React.Component {
+	constructor(props) {
+		super(props);
+	}
+	render() {
+		return (<div></div>);
 	}
 }
 
@@ -61,12 +105,12 @@ export default class Goods extends React.Component {
 			<div>
 				<GridList cellHeight={300} cols={this.state.cols} padding={2}>
 					<GridTile title="7122" subtitle="by kevinptt"
-						actionIcon={<IconButton><StarBorder color="white"/></IconButton>}
+						actionIcon={<IconButton><ContentAdd color="white"/></IconButton>}
 						cols={2} rows={2}
 					></GridTile>
 					{data.map(tile => (
 						<GridTile title={tile} subtitle="by kevinptt"
-							actionIcon={<IconButton><StarBorder color="white"/></IconButton>}
+							actionIcon={<IconButton><ContentAdd color="white"/></IconButton>}
 							onTouchTap={this.showDialog.bind(this)}
 							></GridTile>
 					))}
