@@ -30,7 +30,8 @@ import ContentClear from 'material-ui/lib/svg-icons/content/clear';
 import ShoppingCart from 'material-ui/lib/svg-icons/action/shopping-cart';
 
 const API = {
-	Goods: "/shop/api/goods"
+	Goods: "/shop/api/goods",
+	Orders: "/shop/api/orders"
 };
 
 
@@ -43,7 +44,8 @@ export default class Cart extends React.Component {
 				list: [],
 				totalPrice: 0,
 				errorText: {},
-				sendable: false,
+				noEmptyInput: false,
+				sending: false,
 				inputData: {}
 			};
 	}
@@ -76,6 +78,25 @@ export default class Cart extends React.Component {
 	clearList(e) {
 		this.setState({list: [], totalPrice: 0});
 	}
+	sendOrder(e) {
+		this.setState({sending: true});
+		let sendData = {list: this.state.list, inputData: this.state.inputData};
+		$.ajax({
+			url: this.props.ordersAPI,
+			type: 'post',
+			contentType: "application/json",
+			dataType: 'json',
+			data: JSON.stringify(sendData),
+			success: function(data) {
+			}.bind(this),
+			error: function(xhr, status, err) {
+				console.error(status, err.toString());
+			}.bind(this),
+			complete: function(a, b) {
+				this.setState({sending: false});
+			}.bind(this)
+		});
+	}
 	_checkEmpty(key, e) {
 		let errorText2 = {}, inputData2 = {};
 		errorText2[key] = e.target.value ? '' : '不可為空白',
@@ -85,16 +106,16 @@ export default class Cart extends React.Component {
 		this.setState({
 			errorText: errorText2,
 			inputData: inputData2,
-			sendable: inputData2.name && inputData2.studentID && inputData2.phone && inputData2.email
+			noEmptyInput: inputData2.name && inputData2.studentID && inputData2.phone && inputData2.email
 		});
 	}
 	render() {
 		let actions = [
 			<FlatButton
 				label="送出訂單"
-				disabled={!this.state.sendable}
+				disabled={!(this.state.noEmptyInput && !this.state.sending)}
 				secondary={true}
-				 />,
+				onTouchTap={this.sendOrder.bind(this)} />,
 			<FlatButton
 				label="取消"
 				onTouchTap={this.hideDialog.bind(this)} />,
@@ -423,7 +444,7 @@ export default class MyShop extends React.Component {
 	render() {
 		return (
 			<div>
-				<Cart ref="cart" mobile={this.state.mobile} />
+				<Cart ref="cart" ordersAPI={API.Orders} mobile={this.state.mobile} />
 				<div className="content">
 					<AppBar iconElementRight={<IconButton onTouchTap={this.toggleCart.bind(this)}><ShoppingCart /></IconButton>} title="梅後商城" style={{position: "fixed"}} />
 					<Goods className="Goods" goodsAPI={API.Goods} handleAdd={this.addToCart.bind(this)} mobile={this.state.mobile} />
