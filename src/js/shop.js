@@ -197,7 +197,19 @@ export default class Goods extends React.Component {
 		this.setState({ typeSelected: update(this.state.typeSelected, {$merge: obj}) });
 	}
 	render() {
-		let actions = [
+		let currGood = this.state.goods.filter(good => (good.id==this.state.showID))[0];
+		let dropdown =
+			Object.keys(currGood.types||{}).map(t_type => (
+				<DropDownMenu
+					maxHeight={220}
+					value={this.state.typeSelected[currGood.id][t_type]}
+					onChange={this._onDDChange.bind(this, currGood.id, t_type)}>
+					{currGood.types[t_type].map(type => (
+						<MenuItem value={type.id} primaryText={type.type} />
+				))}
+				</DropDownMenu>
+			));
+		let actions = dropdown.concat([
 			<FlatButton
 				label="加入購物車"
 				secondary={true}
@@ -205,8 +217,7 @@ export default class Goods extends React.Component {
 			<FlatButton
 				label="關閉"
 				onTouchTap={this.hideDialog.bind(this)} />,
-		];
-		let currGood = this.state.goods.filter(good => (good.id==this.state.showID))[0];
+		]);
 		return (
 			<div className={this.props.className}>
 				<GridList cellHeight={238} cols={this.props.mobile?1:4} padding={2}>
@@ -248,17 +259,6 @@ export default class Goods extends React.Component {
 					<div className="flex-box">
 						<div className="flex-item one"> <img src={currGood.src} /> </div>
 						<div className="flex-item one" dangerouslySetInnerHTML={{__html: currGood.description}}></div>
-						<div className="flex-item full">{
-							Object.keys(currGood.types||{}).map(t_type => (
-								<DropDownMenu
-									value={this.state.typeSelected[currGood.id][t_type]}
-									onChange={this._onDDChange.bind(this, currGood.id, t_type)}>
-									{currGood.types[t_type].map(type => (
-										<MenuItem value={type.id} primaryText={type.type} />
-								))}
-								</DropDownMenu>
-							))
-						}</div>
 					</div>
 				</Dialog>
 			</div>
