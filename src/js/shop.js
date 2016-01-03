@@ -37,13 +37,13 @@ const API = {
 export default class Cart extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {open: !props.mobile, list: [], totalPrice: 0};
+		this.state = {navOpen: !props.mobile, list: [], dialogOpen: false, totalPrice: 0};
 	}
 	toggle(val, e) {
 		if (val!=null)
-			this.setState({open: val});
+			this.setState({navOpen: val});
 		else
-			this.setState({open: !this.state.open});
+			this.setState({navOpen: !this.state.open});
 	}
 	updatePrice() {
 		this.setState({ totalPrice: this.state.list.reduce((a, b) => a+(b.special||b.price), 0) });
@@ -55,13 +55,32 @@ export default class Cart extends React.Component {
 	remove(index) {
 		this.setState({ list: update(this.state.list, {$splice: [[index, 1]]}) }, this.updatePrice);
 	}
+	checkout(e) {
+		this.showDialog();
+	}
+	showDialog(id) {
+		this.setState({dialogOpen: true});
+	}
+	hideDialog() {
+		this.setState({dialogOpen: false});
+	}
 	render() {
+		let actions = [
+			<FlatButton
+				label="送出訂單"
+				disabled={true}
+				secondary={true}
+				 />,
+			<FlatButton
+				label="取消"
+				onTouchTap={this.hideDialog.bind(this)} />,
+		];
 		return (
 			<SideNav
 				width={300}
-				openRight={true} open={this.state.open}
+				openRight={true} open={this.state.navOpen}
 				docked={!this.props.mobile}
-				onRequestChange={open => this.setState({open})}>
+				onRequestChange={navOpen => this.setState({navOpen})}>
 				<AppBar
 					iconElementLeft={<IconButton onTouchTap={this.toggle.bind(this, null)}><Close /></IconButton>}
 					iconElementRight={
@@ -72,13 +91,23 @@ export default class Cart extends React.Component {
 							targetOrigin={{horizontal: 'right', vertical: 'top'}}
 							anchorOrigin={{horizontal: 'right', vertical: 'top'}}
 						>
-							<MenuItem primaryText="立即結帳" />
+							<MenuItem primaryText="立即結帳" onTouchTap={this.checkout.bind(this)} />
 							<MenuItem primaryText="清空購物車" />
 						</IconMenu>
 					}
 					title="購物車" />
 				<CartList list={this.state.list} handleRemove={this.remove.bind(this)} />
 				<CartSummary totalPrice={this.state.totalPrice} />
+				<Dialog
+					className="dialog"
+					title="結帳"
+					width="85%"
+					actions={actions}
+					open={this.state.dialogOpen}
+					autoScrollBodyContent={true}
+					onRequestClose={this.hideDialog.bind(this)}>
+					還不能結帳哦
+				</Dialog>
 			</SideNav>
 		);
 	}
@@ -303,7 +332,6 @@ export default class Goods extends React.Component {
 					title={currGood.name}
 					width="85%"
 					actions={actions}
-					modal={false}
 					open={this.state.open}
 					autoScrollBodyContent={true}
 					onRequestClose={this.hideDialog.bind(this)}>
