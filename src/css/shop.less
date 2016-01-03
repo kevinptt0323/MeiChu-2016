@@ -49,6 +49,14 @@
 	}
 }
 
+.price {
+	font-size: 1.3em;
+	.retail:before { content: "$" }
+	.special:before { content: "$" }
+	.special { font-weight: bold; }
+	&.special .retail { text-decoration: line-through; }
+}
+
 .cart-list {
 	height: calc(~'100vh - 64px - 80px');
 	overflow: auto;

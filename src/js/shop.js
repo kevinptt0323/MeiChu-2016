@@ -85,13 +85,23 @@ export default class CartList extends React.Component {
 		let getNestedList = (arr) => {
 		};
 		this.props.list.forEach((good, index) => {
+			let price = (good.special) ? (
+				<div className="special price">
+					<span className="retail" style={{color: Colors.grey500}}>{good.price}</span>&nbsp;
+					<span className="special" style={{color: Colors.pink300}}>{good.special}</span>
+				</div>
+			) : (
+				<div className="price">
+					<span className="retail">{good.price}</span>
+				</div>
+			);
 			if (good.childObj) {
 				cartList.push(
 					<ListItem
 						key={index+".0"}
 						rightIconButton={<IconButton onTouchTap={this._onRemoveClick.bind(this, index)}><ContentClear /></IconButton>}
 						primaryText={good.name}
-						secondaryText={good.special || good.price}
+						secondaryText={price}
 						initiallyOpen={true}
 						nestedItems={good.childObj.map((sub_good, sub_index) => (
 							<ListItem key={index+".0."+sub_index} primaryText={sub_good.name} />
@@ -104,7 +114,7 @@ export default class CartList extends React.Component {
 						key={index+".0"}
 						rightIconButton={<IconButton onTouchTap={this._onRemoveClick.bind(this, index)}><ContentClear /></IconButton>}
 						primaryText={good.name}
-						secondaryText={good.special || good.price}
+						secondaryText={price}
 					/>
 				);
 			}
@@ -201,11 +211,12 @@ export default class Goods extends React.Component {
 		let dropdown =
 			Object.keys(currGood.types||{}).map(t_type => (
 				<DropDownMenu
+					key={currGood.id + "." + t_type}
 					maxHeight={220}
 					value={this.state.typeSelected[currGood.id][t_type]}
 					onChange={this._onDDChange.bind(this, currGood.id, t_type)}>
-					{currGood.types[t_type].map(type => (
-						<MenuItem value={type.id} primaryText={type.type} />
+					{currGood.types[t_type].map((type,index) => (
+						<MenuItem key={currGood.id + "." + t_type + "." + index} value={type.id} primaryText={type.type} />
 				))}
 				</DropDownMenu>
 			));
@@ -218,6 +229,16 @@ export default class Goods extends React.Component {
 				label="關閉"
 				onTouchTap={this.hideDialog.bind(this)} />,
 		]);
+		let price = (currGood.special) ? (
+			<span className="special price">
+				<span className="retail" style={{color: Colors.grey500}}>{currGood.price}</span>&nbsp;
+				<span className="special" style={{color: Colors.pink300}}>{currGood.special}</span>
+			</span>
+		) : (
+			<span className="price">
+				<span className="retail">{currGood.price}</span>
+			</span>
+		);
 		return (
 			<div className={this.props.className}>
 				<GridList cellHeight={238} cols={this.props.mobile?1:4} padding={2}>
@@ -234,9 +255,20 @@ export default class Goods extends React.Component {
 						}
 						if ([8].indexOf(good.id)!=-1)
 							rows = 2;
+						let price = (good.special) ? (
+							<span className="special price">
+								<span className="retail" style={{color: Colors.grey400}}>{good.price}</span>&nbsp;
+								<span className="special" style={{color: Colors.pink300}}>{good.special}</span>
+							</span>
+						) : (
+							<span className="price">
+								<span className="retail" style={{color: Colors.grey200}}>{good.price}</span>
+							</span>
+						);
 						return (
 							<GridTile className="grid-tile" key={index}
 								title={good.name}
+								subtitle={price}
 								actionIcon={<IconButton onTouchTap={this._onAddClick.bind(this, good.id)}><ContentAdd color="white"/></IconButton>}
 								cols={cols} rows={rows}
 								titleBackground={gradientBg}
@@ -258,7 +290,10 @@ export default class Goods extends React.Component {
 					onRequestClose={this.hideDialog.bind(this)}>
 					<div className="flex-box">
 						<div className="flex-item one"> <img src={currGood.src} /> </div>
-						<div className="flex-item one" dangerouslySetInnerHTML={{__html: currGood.description}}></div>
+						<div className="flex-item one">
+							<div dangerouslySetInnerHTML={{__html: currGood.description}}></div>
+							<div style={{textAlign: "right"}}>售價：{price}</div>
+						</div>
 					</div>
 				</Dialog>
 			</div>
