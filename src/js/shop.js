@@ -134,13 +134,21 @@ export default class CartSummary extends React.Component {
 export default class Goods extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {open: false, showID: 1, goods: [{id: 1, name: "", src: "", description: ""}]};
+		this.state = {open: false, showID: 1, goods: [{id: 1, name: "", src: "", description: ""}], typeSelected: {}};
 
+		this.confirm_queue = [];
 		$.ajax({
 			url: props.goodsAPI,
 			dataType: 'json',
 			success: function(data) {
-				this.setState({goods: data});
+				let typeSelected = {};
+				data.forEach(good => {
+					typeSelected[good.id] = {};
+					for(let key in good.types) {
+						typeSelected[good.id][key] = good.types[key][0].id;
+					}
+				});
+				this.setState({goods: data, typeSelected: typeSelected});
 			}.bind(this),
 			error: function(xhr, status, err) {
 				//console.error(this.props.resultUrl, status, err.toString());
@@ -159,11 +167,34 @@ export default class Goods extends React.Component {
 	hideDialog() {
 		this.setState({open: false});
 	}
+	_confirm(good, cb) {
+		//console.log(good);
+		cb();
+	}
+	_add(toAdd, isChild) {
+		toAdd.childObj = toAdd.child ? toAdd.child.map(id => this._add(this.getGoodByID(id), true)) : [];
+		if (toAdd.types) {
+			this.confirm_queue.push(toAdd);
+		}
+		if (!isChild) {
+			let func = this.props.handleAdd.bind(this, toAdd);
+			while (this.confirm_queue && this.confirm_queue.length) {
+				func = this._confirm.bind(this, this.confirm_queue.pop(), func);
+			}
+			func();
+		}
+		return toAdd;
+	}
 	_onAddClick(id, e) {
-		let toAdd = this.getGoodByID(id);
-		toAdd.childObj = toAdd.child ? toAdd.child.map(this.getGoodByID.bind(this)) : [];
-		this.props.handleAdd(toAdd);
+		this.confirm_queue = [];
+		this._add(this.getGoodByID(id), false);
 		e.stopPropagation();
+	}
+	_onDDChange(id, t_type, e, index, value) {
+		let obj = {}, data = {};
+		data[t_type] = value;
+		obj[id] = update(this.state.typeSelected[id], {$merge: data});
+		this.setState({ typeSelected: update(this.state.typeSelected, {$merge: obj}) });
 	}
 	render() {
 		let actions = [
@@ -215,8 +246,19 @@ export default class Goods extends React.Component {
 					autoScrollBodyContent={true}
 					onRequestClose={this.hideDialog.bind(this)}>
 					<div className="flex-box">
-						<div className="flex-item flex-item-1"> <img src={currGood.src} /> </div>
-						<div className="flex-item flex-item-1" dangerouslySetInnerHTML={{__html: currGood.description}}></div>
+						<div className="flex-item one"> <img src={currGood.src} /> </div>
+						<div className="flex-item one" dangerouslySetInnerHTML={{__html: currGood.description}}></div>
+						<div className="flex-item full">{
+							Object.keys(currGood.types||{}).map(t_type => (
+								<DropDownMenu
+									value={this.state.typeSelected[currGood.id][t_type]}
+									onChange={this._onDDChange.bind(this, currGood.id, t_type)}>
+									{currGood.types[t_type].map(type => (
+										<MenuItem value={type.id} primaryText={type.type} />
+								))}
+								</DropDownMenu>
+							))
+						}</div>
 					</div>
 				</Dialog>
 			</div>
