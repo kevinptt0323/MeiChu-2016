@@ -47,8 +47,9 @@ export default class Cart extends React.Component {
 	updatePrice() {
 		this.setState({ totalPrice: this.state.list.reduce((a, b) => a+(b.special||b.price), 0) });
 	}
-	add(good) {
-		this.setState({ list: update(this.state.list, {$push: [good]}) }, this.updatePrice);
+	add(good, typeSelected) {
+		let newGood = update(good, {$merge: {typeSelected: typeSelected}});
+		this.setState({ list: update(this.state.list, {$push: [newGood]}) }, this.updatePrice);
 	}
 	remove(index) {
 		this.setState({ list: update(this.state.list, {$splice: [[index, 1]]}) }, this.updatePrice);
@@ -95,16 +96,20 @@ export default class CartList extends React.Component {
 					<span className="retail">{good.price}</span>
 				</div>
 			);
+			let getName = (good) => {
+				let typeStr = Object.keys(good.typeSelected||{}).map(t_type => good.types[t_type].filter(tt => tt.id==good.typeSelected[t_type])[0].type).join(",");
+				return good.name + (typeStr.length ? "(" + typeStr + ")" : "");
+			}
 			if (good.childObj) {
 				cartList.push(
 					<ListItem
 						key={index+".0"}
 						rightIconButton={<IconButton onTouchTap={this._onRemoveClick.bind(this, index)}><ContentClear /></IconButton>}
-						primaryText={good.name}
+						primaryText={getName(good)}
 						secondaryText={price}
 						initiallyOpen={true}
 						nestedItems={good.childObj.map((sub_good, sub_index) => (
-							<ListItem key={index+".0."+sub_index} primaryText={sub_good.name} />
+							<ListItem key={index+".0."+sub_index} primaryText={getName(sub_good)} />
 						))}
 					/>
 				);
@@ -113,7 +118,7 @@ export default class CartList extends React.Component {
 					<ListItem
 						key={index+".0"}
 						rightIconButton={<IconButton onTouchTap={this._onRemoveClick.bind(this, index)}><ContentClear /></IconButton>}
-						primaryText={good.name}
+						primaryText={getName(good)}
 						secondaryText={price}
 					/>
 				);
@@ -182,12 +187,15 @@ export default class Goods extends React.Component {
 		cb();
 	}
 	_add(toAdd, isChild) {
-		toAdd.childObj = toAdd.child ? toAdd.child.map(id => this._add(this.getGoodByID(id), true)) : [];
+		toAdd.childObj = toAdd.child ? toAdd.child.map(id => {
+			let obj = update(this._add(this.getGoodByID(id), true), {$merge: {typeSelected: this.state.typeSelected[id]}});
+			return obj;
+		}) : [];
 		if (toAdd.types) {
 			this.confirm_queue.push(toAdd);
 		}
 		if (!isChild) {
-			let func = this.props.handleAdd.bind(this, toAdd);
+			let func = this.props.handleAdd.bind(this, toAdd, this.state.typeSelected[toAdd.id]);
 			while (this.confirm_queue && this.confirm_queue.length) {
 				func = this._confirm.bind(this, this.confirm_queue.pop(), func);
 			}
@@ -321,8 +329,8 @@ export default class MyShop extends React.Component {
 	toggleCart(e) {
 		this.refs.cart.toggle(null, e);
 	}
-	addToCart(good, e) {
-		this.refs.cart.add(good);
+	addToCart(good, typeSelected, e) {
+		this.refs.cart.add(good, typeSelected);
 	}
 	render() {
 		return (
