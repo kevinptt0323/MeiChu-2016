@@ -37,7 +37,15 @@ const API = {
 export default class Cart extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {navOpen: !props.mobile, list: [], dialogOpen: false, totalPrice: 0, errorText: {}};
+		this.state = {
+				navOpen: !props.mobile,
+				dialogOpen: false,
+				list: [],
+				totalPrice: 0,
+				errorText: {},
+				sendable: false,
+				inputData: {}
+			};
 	}
 	toggle(val, e) {
 		if (val!=null)
@@ -45,15 +53,16 @@ export default class Cart extends React.Component {
 		else
 			this.setState({navOpen: !this.state.navOpen});
 	}
-	updatePrice() {
-		this.setState({ totalPrice: this.state.list.reduce((a, b) => a+(b.special||b.price), 0) });
-	}
 	add(good, typeSelected) {
 		let newGood = update(good, {$merge: {typeSelected: typeSelected}});
-		this.setState({ list: update(this.state.list, {$push: [newGood]}) }, this.updatePrice);
+		let newList = update(this.state.list, {$push: [newGood]});
+		let newPrice = newList.reduce((a, b) => a+(b.special||b.price), 0)
+		this.setState({list: newList, totalPrice: newPrice});
 	}
 	remove(index) {
-		this.setState({ list: update(this.state.list, {$splice: [[index, 1]]}) }, this.updatePrice);
+		let newList = update(this.state.list, {$splice: [[index, 1]]});
+		let newPrice = newList.reduce((a, b) => a+(b.special||b.price), 0)
+		this.setState({list: newList, totalPrice: newPrice});
 	}
 	checkout(e) {
 		this.showDialog();
@@ -65,18 +74,25 @@ export default class Cart extends React.Component {
 		this.setState({dialogOpen: false});
 	}
 	clearList(e) {
-		this.setState({ list: [] }, this.updatePrice);
+		this.setState({list: [], totalPrice: 0});
 	}
-	_checkEmpty(index, e) {
-		let obj = {};
-		obj[index] = e.target.value ? '' : '不可為空白',
-		this.setState({ errorText: update(this.state.errorText, {$merge: obj}) });
+	_checkEmpty(key, e) {
+		let errorText2 = {}, inputData2 = {};
+		errorText2[key] = e.target.value ? '' : '不可為空白',
+		inputData2[key] = e.target.value;
+		errorText2 = update(this.state.errorText, {$merge: errorText2});
+		inputData2 = update(this.state.inputData, {$merge: inputData2});
+		this.setState({
+			errorText: errorText2,
+			inputData: inputData2,
+			sendable: inputData2.name && inputData2.studentID && inputData2.phone && inputData2.email
+		});
 	}
 	render() {
 		let actions = [
 			<FlatButton
 				label="送出訂單"
-				disabled={true}
+				disabled={!this.state.sendable}
 				secondary={true}
 				 />,
 			<FlatButton
@@ -114,22 +130,31 @@ export default class Cart extends React.Component {
 					open={this.state.dialogOpen}
 					autoScrollBodyContent={true}
 					onRequestClose={this.hideDialog.bind(this)}>
-					<div style={{display: "flex"}}>
+					<div style={{display: this.props.mobile?"block":"flex"}}>
 						<TextField
-							className="button"
-							errorText={this.state.errorText[0]||""}
+							className="input"
+							fullWidth={true}
+							errorText={this.state.errorText.name||""}
 							floatingLabelText="姓名"
-							onChange={this._checkEmpty.bind(this, 0)} />
+							onChange={this._checkEmpty.bind(this, 'name')} />
 						<TextField
-							className="button"
-							errorText={this.state.errorText[1]||""}
+							className="input"
+							fullWidth={true}
+							errorText={this.state.errorText.studentID||""}
 							floatingLabelText="學號"
-							onChange={this._checkEmpty.bind(this, 1)} />
+							onChange={this._checkEmpty.bind(this, 'studentID')} />
 						<TextField
-							className="button"
-							errorText={this.state.errorText[2]||""}
+							className="input"
+							fullWidth={true}
+							errorText={this.state.errorText.phone||""}
 							floatingLabelText="電話"
-							onChange={this._checkEmpty.bind(this, 2)} />
+							onChange={this._checkEmpty.bind(this, 'phone')} />
+						<TextField
+							className="input"
+							fullWidth={true}
+							errorText={this.state.errorText.email||""}
+							floatingLabelText="email"
+							onChange={this._checkEmpty.bind(this, 'email')} />
 					</div>
 				</Dialog>
 			</SideNav>
