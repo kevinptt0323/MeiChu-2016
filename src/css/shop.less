@@ -60,6 +60,16 @@ body {
 	&.special .retail { text-decoration: line-through; }
 }
 
+.cart-dialog {
+	&>div {
+		display: flex;
+		.button {
+			flex: 1;
+			margin: 5px;
+		}
+	}
+}
+
 .cart-list {
 	height: calc(~'100vh - 64px - 80px');
 	overflow: auto;

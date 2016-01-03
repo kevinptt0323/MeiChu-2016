@@ -37,13 +37,13 @@ const API = {
 export default class Cart extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {navOpen: !props.mobile, list: [], dialogOpen: false, totalPrice: 0};
+		this.state = {navOpen: !props.mobile, list: [], dialogOpen: false, totalPrice: 0, errorText: {}};
 	}
 	toggle(val, e) {
 		if (val!=null)
 			this.setState({navOpen: val});
 		else
-			this.setState({navOpen: !this.state.open});
+			this.setState({navOpen: !this.state.navOpen});
 	}
 	updatePrice() {
 		this.setState({ totalPrice: this.state.list.reduce((a, b) => a+(b.special||b.price), 0) });
@@ -63,6 +63,11 @@ export default class Cart extends React.Component {
 	}
 	hideDialog() {
 		this.setState({dialogOpen: false});
+	}
+	_checkEmpty(index, e) {
+		let obj = {};
+		obj[index] = e.target.value ? '' : '不可為空白',
+		this.setState({ errorText: update(this.state.errorText, {$merge: obj}) });
 	}
 	render() {
 		let actions = [
@@ -99,14 +104,30 @@ export default class Cart extends React.Component {
 				<CartList list={this.state.list} handleRemove={this.remove.bind(this)} />
 				<CartSummary totalPrice={this.state.totalPrice} />
 				<Dialog
-					className="dialog"
+					className="cart-dialog"
 					title="結帳"
 					width="85%"
 					actions={actions}
 					open={this.state.dialogOpen}
 					autoScrollBodyContent={true}
 					onRequestClose={this.hideDialog.bind(this)}>
-					還不能結帳哦
+					<div style={{display: "flex"}}>
+						<TextField
+							className="button"
+							errorText={this.state.errorText[0]||""}
+							floatingLabelText="姓名"
+							onChange={this._checkEmpty.bind(this, 0)} />
+						<TextField
+							className="button"
+							errorText={this.state.errorText[1]||""}
+							floatingLabelText="學號"
+							onChange={this._checkEmpty.bind(this, 1)} />
+						<TextField
+							className="button"
+							errorText={this.state.errorText[2]||""}
+							floatingLabelText="電話"
+							onChange={this._checkEmpty.bind(this, 2)} />
+					</div>
 				</Dialog>
 			</SideNav>
 		);
