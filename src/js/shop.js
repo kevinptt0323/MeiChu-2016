@@ -14,6 +14,7 @@ import FlatButton   from 'material-ui/lib/flat-button';
 import GridList     from 'material-ui/lib/grid-list/grid-list';
 import GridTile     from 'material-ui/lib/grid-list/grid-tile';
 import IconButton   from 'material-ui/lib/icon-button';
+import IconMenu     from 'material-ui/lib/menus/icon-menu';
 import List         from 'material-ui/lib/lists/list';
 import ListItem     from 'material-ui/lib/lists/list-item';
 import MenuItem     from 'material-ui/lib/menus/menu-item';
@@ -22,11 +23,11 @@ import SideNav      from 'material-ui/lib/left-nav';
 import RaisedButton from 'material-ui/lib/raised-button';
 import TextField    from 'material-ui/lib/text-field';
 
-import StarBorder      from 'material-ui/lib/svg-icons/toggle/star-border';
-import NavigationClose from 'material-ui/lib/svg-icons/navigation/close';
-import ContentAdd      from 'material-ui/lib/svg-icons/content/add';
-import ContentClear    from 'material-ui/lib/svg-icons/content/clear';
-import ShoppingCart    from 'material-ui/lib/svg-icons/action/shopping-cart';
+import Close        from 'material-ui/lib/svg-icons/navigation/close';
+import MoreVert     from 'material-ui/lib/svg-icons/navigation/more-vert';
+import ContentAdd   from 'material-ui/lib/svg-icons/content/add';
+import ContentClear from 'material-ui/lib/svg-icons/content/clear';
+import ShoppingCart from 'material-ui/lib/svg-icons/action/shopping-cart';
 
 const API = {
 	Goods: "/shop/api/goods"
@@ -62,9 +63,19 @@ export default class Cart extends React.Component {
 				docked={!this.props.mobile}
 				onRequestChange={open => this.setState({open})}>
 				<AppBar
-					iconElementLeft={<IconButton
-						onTouchTap={this.toggle.bind(this, null)}
-						><NavigationClose /></IconButton>}
+					iconElementLeft={<IconButton onTouchTap={this.toggle.bind(this, null)}><Close /></IconButton>}
+					iconElementRight={
+						<IconMenu
+							iconButtonElement={
+								<IconButton><MoreVert /></IconButton>
+							}
+							targetOrigin={{horizontal: 'right', vertical: 'top'}}
+							anchorOrigin={{horizontal: 'right', vertical: 'top'}}
+						>
+							<MenuItem primaryText="立即結帳" />
+							<MenuItem primaryText="清空購物車" />
+						</IconMenu>
+					}
 					title="購物車" />
 				<CartList list={this.state.list} handleRemove={this.remove.bind(this)} />
 				<CartSummary totalPrice={this.state.totalPrice} />
