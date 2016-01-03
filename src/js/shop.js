@@ -249,7 +249,7 @@ export default class Goods extends React.Component {
 		);
 		return (
 			<div className={this.props.className}>
-				<GridList cellHeight={238} cols={this.props.mobile?1:4} padding={2}>
+				<GridList cellHeight={238} cols={this.props.mobile?1:4} padding={5}>
 					{this.state.goods.map((good, index) => {
 						let cols = 1, rows = 1;
 						let gradientBg = 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)';
