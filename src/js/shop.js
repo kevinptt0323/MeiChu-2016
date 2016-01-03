@@ -64,6 +64,9 @@ export default class Cart extends React.Component {
 	hideDialog() {
 		this.setState({dialogOpen: false});
 	}
+	clearList(e) {
+		this.setState({ list: [] }, this.updatePrice);
+	}
 	_checkEmpty(index, e) {
 		let obj = {};
 		obj[index] = e.target.value ? '' : '不可為空白',
@@ -97,7 +100,7 @@ export default class Cart extends React.Component {
 							anchorOrigin={{horizontal: 'right', vertical: 'top'}}
 						>
 							<MenuItem primaryText="立即結帳" onTouchTap={this.checkout.bind(this)} />
-							<MenuItem primaryText="清空購物車" />
+							<MenuItem primaryText="清空購物車" onTouchTap={this.clearList.bind(this)} />
 						</IconMenu>
 					}
 					title="購物車" />
