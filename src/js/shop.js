@@ -80,7 +80,8 @@ export default class Cart extends React.Component {
 	}
 	sendOrder(e) {
 		this.setState({sending: true});
-		let sendData = {list: this.state.list, inputData: this.state.inputData};
+		let getSimpleData = good => ({id: good.id, typeSelected: good.typeSelected, childObj: good.childObj.map(getSimpleData)});
+		let sendData = {list: this.state.list.map(getSimpleData), inputData: this.state.inputData};
 		$.ajax({
 			url: this.props.ordersAPI,
 			type: 'post',
@@ -193,8 +194,6 @@ export default class CartList extends React.Component {
 	}
 	render() {
 		let cartList = [];
-		let getNestedList = (arr) => {
-		};
 		this.props.list.forEach((good, index) => {
 			let price = (good.special) ? (
 				<div className="special price">
