@@ -145,6 +145,7 @@ export default class Cart extends React.Component {
 				label="關閉"
 				onTouchTap={this.hideDialog2.bind(this)} />,
 		];
+		let closeButton = (<IconButton onTouchTap={this.toggle.bind(this, null)}><Close /></IconButton>);
 		return (
 			<SideNav
 				width={300}
@@ -152,7 +153,7 @@ export default class Cart extends React.Component {
 				docked={!this.props.mobile}
 				onRequestChange={navOpen => this.setState({navOpen})}>
 				<AppBar
-					iconElementLeft={<IconButton onTouchTap={this.toggle.bind(this, null)}><Close /></IconButton>}
+					iconElementLeft={this.props.mobile?closeButton:(<div></div>)}
 					iconElementRight={
 						<IconMenu
 							iconButtonElement={
