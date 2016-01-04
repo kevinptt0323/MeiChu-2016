@@ -60,6 +60,44 @@ export default class OrderList extends React.Component {
 			}.bind(this)
 		});
 	}
+	picked(id, index, e) {
+		this.setState({sending: true});
+		let sendData = { id: id, action: "picked" };
+		$.ajax({
+			url: this.props.ordersAPI + "/" + id,
+			type: 'post',
+			contentType: "application/json",
+			dataType: 'json',
+			data: JSON.stringify(sendData),
+			success: function(data) {
+				this.setState({ orders: update(this.state.orders, {$splice: [[index, 1, data.data]]}) });
+			}.bind(this),
+			error: function(data, status, err) {
+			}.bind(this),
+			complete: function(a, b) {
+				this.setState({sending: false});
+			}.bind(this)
+		});
+	}
+	delete_(id, index, e) {
+		this.setState({sending: true});
+		let sendData = { id: id, action: "delete" };
+		$.ajax({
+			url: this.props.ordersAPI + "/" + id,
+			type: 'post',
+			contentType: "application/json",
+			dataType: 'json',
+			data: JSON.stringify(sendData),
+			success: function(data) {
+				this.setState({ orders: update(this.state.orders, {$splice: [[index, 1]]}) });
+			}.bind(this),
+			error: function(data, status, err) {
+			}.bind(this),
+			complete: function(a, b) {
+				this.setState({sending: false});
+			}.bind(this)
+		});
+	}
 	render() {
 		let textCenter = {textAlign: "center"};
 		return (
@@ -96,11 +134,19 @@ export default class OrderList extends React.Component {
 										secondary={true}
 										onTouchTap={this.paid.bind(this, order.id, index)} />
 								}</TableRowColumn>
-								<TableRowColumn style={textCenter}>{order.picked_at}</TableRowColumn>
+								<TableRowColumn style={textCenter}>{order.picked_at?order.picked_at:
+									<FlatButton
+										label="登記取貨"
+										secondary={true}
+										onTouchTap={this.picked.bind(this, order.id, index)} />
+								}</TableRowColumn>
 								<TableRowColumn style={textCenter}>{order.order_goods}</TableRowColumn>
-								<TableRowColumn style={textCenter}>
-									{<IconButton ><Close /></IconButton>}
-								</TableRowColumn>
+								<TableRowColumn style={textCenter}>{
+									<FlatButton
+										label="刪除"
+										primary={true}
+										onTouchTap={this.delete_.bind(this, order.id, index)} />
+								}</TableRowColumn>
 							</TableRow>
 						))
 					}</TableBody>
