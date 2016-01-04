@@ -21,6 +21,7 @@ import ListItem     from 'material-ui/lib/lists/list-item';
 import MenuItem     from 'material-ui/lib/menus/menu-item';
 import Paper        from 'material-ui/lib/paper';
 import SideNav      from 'material-ui/lib/left-nav';
+import Snackbar     from 'material-ui/lib/snackbar';
 import RaisedButton from 'material-ui/lib/raised-button';
 import TextField    from 'material-ui/lib/text-field';
 
@@ -242,7 +243,7 @@ export default class CartList extends React.Component {
 				</div>
 			);
 			let getName = (good) => {
-				let typeStr = Object.keys(good.typeSelected||{}).map(t_type => good.types[t_type].filter(tt => tt.id==good.typeSelected[t_type])[0].type).join(",");
+				let typeStr = Object.keys(good.typeSelected||{}).map(type_group => good.types[type_group].filter(tt => tt.id==good.typeSelected[type_group])[0].name).join(",");
 				return good.name + (typeStr.length ? "(" + typeStr + ")" : "");
 			}
 			if (good.childObj) {
@@ -321,8 +322,9 @@ export default class Goods extends React.Component {
 		let ret = this.state.goods.filter(good => (good.id==id));
 		return ret ? ret[0] : {};
 	}
-	showDialog(id) {
+	showDialog(id, e) {
 		this.setState({open: true, showID: id});
+		e.stopPropagation();
 	}
 	hideDialog() {
 		this.setState({open: false});
@@ -345,6 +347,7 @@ export default class Goods extends React.Component {
 				func = this._confirm.bind(this, this.confirm_queue.pop(), func);
 			}
 			func();
+			this.props.handleMessage("已加入購物車");
 		}
 		return toAdd;
 	}
@@ -353,21 +356,21 @@ export default class Goods extends React.Component {
 		this._add(this.getGoodByID(id), false);
 		e.stopPropagation();
 	}
-	_onDDChange(id, t_type, e, index, value) {
+	_onDDChange(id, type_group, e, index, value) {
 		let obj = {}, data = {};
-		data[t_type] = value;
+		data[type_group] = value;
 		obj[id] = update(this.state.typeSelected[id], {$merge: data});
 		this.setState({ typeSelected: update(this.state.typeSelected, {$merge: obj}) });
 	}
 	getSelections(good) {
-		let ret = Object.keys(good.types||{}).map(t_type => (
+		let ret = Object.keys(good.types||{}).map(type_group => (
 			<DropDownMenu
-				key={good.id + "." + t_type}
+				key={good.id + "." + type_group}
 				maxHeight={220}
-				value={this.state.typeSelected[good.id][t_type]}
-				onChange={this._onDDChange.bind(this, good.id, t_type)}>
-				{good.types[t_type].map((type,index) => (
-					<MenuItem key={good.id + "." + t_type + "." + index} value={type.id} primaryText={type.type} />
+				value={this.state.typeSelected[good.id][type_group]}
+				onChange={this._onDDChange.bind(this, good.id, type_group)}>
+				{good.types[type_group].map((type,index) => (
+					<MenuItem key={good.id + "." + type_group + "." + index} value={type.id} primaryText={type.name} />
 			))}
 			</DropDownMenu>
 		));
@@ -469,7 +472,7 @@ export default class Goods extends React.Component {
 export default class MyShop extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {mobile: true};
+		this.state = {mobile: true, open: false, message: ""};
 	}
 	componentDidMount() {
 		window.addEventListener('resize', this._resize_mixin_callback.bind(this));
@@ -489,14 +492,41 @@ export default class MyShop extends React.Component {
 	addToCart(good, typeSelected, e) {
 		this.refs.cart.add(good, typeSelected);
 	}
+	showSnackBar(message) {
+		if (message) {
+			this.setState({open: true, message: message});
+		} else {
+			this.setState({open: true});
+		}
+	}
+	_handleSBClose(e) {
+		this.setState({open: false});
+	}
 	render() {
 		return (
 			<div>
 				<Cart ref="cart" ordersAPI={API.Orders} mobile={this.state.mobile} />
 				<div className="content">
-					<AppBar iconElementRight={<IconButton onTouchTap={this.toggleCart.bind(this)}><ShoppingCart /></IconButton>} title="梅後商城" style={{position: "fixed"}} />
-					<Goods className="Goods" goodsAPI={API.Goods} handleAdd={this.addToCart.bind(this)} mobile={this.state.mobile} />
+					<AppBar
+						iconElementRight={<IconButton onTouchTap={this.toggleCart.bind(this)}><ShoppingCart /></IconButton>}
+						title="梅後商城"
+						style={{position: "fixed"}}
+						/>
+					<Goods
+						className="Goods"
+						goodsAPI={API.Goods}
+						handleAdd={this.addToCart.bind(this)}
+						handleMessage={this.showSnackBar.bind(this)}
+						mobile={this.state.mobile}
+						/>
 				</div>
+				<Snackbar
+					open={this.state.open}
+					message={this.state.message}
+					action="x"
+					autoHideDuration={3000}
+					onRequestClose={this._handleSBClose.bind(this)}
+				/>
 			</div>
 		);
 	}
