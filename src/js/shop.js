@@ -21,6 +21,7 @@ import ListItem     from 'material-ui/lib/lists/list-item';
 import MenuItem     from 'material-ui/lib/menus/menu-item';
 import Paper        from 'material-ui/lib/paper';
 import SideNav      from 'material-ui/lib/left-nav';
+import Snackbar     from 'material-ui/lib/snackbar';
 import RaisedButton from 'material-ui/lib/raised-button';
 import TextField    from 'material-ui/lib/text-field';
 
@@ -345,6 +346,7 @@ export default class Goods extends React.Component {
 				func = this._confirm.bind(this, this.confirm_queue.pop(), func);
 			}
 			func();
+			this.props.handleMessage("已加入購物車");
 		}
 		return toAdd;
 	}
@@ -469,7 +471,7 @@ export default class Goods extends React.Component {
 export default class MyShop extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {mobile: true};
+		this.state = {mobile: true, open: false, message: ""};
 	}
 	componentDidMount() {
 		window.addEventListener('resize', this._resize_mixin_callback.bind(this));
@@ -489,14 +491,41 @@ export default class MyShop extends React.Component {
 	addToCart(good, typeSelected, e) {
 		this.refs.cart.add(good, typeSelected);
 	}
+	showSnackBar(message) {
+		if (message) {
+			this.setState({open: true, message: message});
+		} else {
+			this.setState({open: true});
+		}
+	}
+	_handleSBClose(e) {
+		this.setState({open: false});
+	}
 	render() {
 		return (
 			<div>
 				<Cart ref="cart" ordersAPI={API.Orders} mobile={this.state.mobile} />
 				<div className="content">
-					<AppBar iconElementRight={<IconButton onTouchTap={this.toggleCart.bind(this)}><ShoppingCart /></IconButton>} title="梅後商城" style={{position: "fixed"}} />
-					<Goods className="Goods" goodsAPI={API.Goods} handleAdd={this.addToCart.bind(this)} mobile={this.state.mobile} />
+					<AppBar
+						iconElementRight={<IconButton onTouchTap={this.toggleCart.bind(this)}><ShoppingCart /></IconButton>}
+						title="梅後商城"
+						style={{position: "fixed"}}
+						/>
+					<Goods
+						className="Goods"
+						goodsAPI={API.Goods}
+						handleAdd={this.addToCart.bind(this)}
+						handleMessage={this.showSnackBar.bind(this)}
+						mobile={this.state.mobile}
+						/>
 				</div>
+				<Snackbar
+					open={this.state.open}
+					message={this.state.message}
+					action="x"
+					autoHideDuration={3000}
+					onRequestClose={this._handleSBClose.bind(this)}
+				/>
 			</div>
 		);
 	}
