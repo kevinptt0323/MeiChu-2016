@@ -1,0 +1,84 @@
+@desktop:   ~"only screen and (min-width: 960px)";
+@tablet:    ~"only screen and (max-width: 959px)";
+
+
+@media @desktop {
+	.content {
+		width: calc(~'100% - 300px');
+	}
+	.flex-box {
+		display: flex;
+		flex-wrap: wrap;
+		.flex-item {
+			margin: 10px;
+			line-height: 1.5rem;
+			&.one {
+				flex: 1 0 0;
+			}
+		}
+	}
+}
+@media @tablet {
+	.content {
+		width: 100%;
+	}
+	.flex-box {
+		display: flex;
+		flex-wrap: wrap;
+		.flex-item {
+			width: 100%;
+		}
+	}
+}
+
+body {
+}
+
+.dialog img {
+	width: 100%;
+}
+
+.Goods {
+	padding-top: 68px;
+}
+
+.grid-tile {
+	cursor: pointer;
+	.img {
+		width: 100%;
+		height: 100%;
+		background-repeat: no-repeat;
+		background-size: contain;
+		background-position: 50% 50%;
+	}
+}
+
+.price {
+	font-size: 1.3em;
+	.retail:before { content: "$" }
+	.special:before { content: "$" }
+	.special { font-weight: bold; }
+	&.special .retail { text-decoration: line-through; }
+}
+
+.checkout-dialog {
+	&>div {
+		.input {
+			margin: 5px;
+		}
+	}
+}
+
+.cart-list {
+	height: calc(~'100vh - 64px - 80px');
+	overflow: auto;
+}
+
+.cart-summary {
+	height: 80px;
+	padding-right: 32px;
+	font-size: 2rem;
+	line-height: 80px;
+	text-align: right;
+}
+

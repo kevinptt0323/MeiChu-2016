@@ -1,0 +1,97 @@
+@z-index-order: 'index', 'activities', 'nav';
+
+.zindex(@elementName, @delta: 0) {
+	.loop(@elementName, @counter) when (@counter > 0) {
+		.loop(@elementName, @counter - 1);
+		.pickIndex(@elementName, @counter);
+	}
+	.loop(@elementName, length(@z-index-order));
+	.pickIndex(@elementName, @counter) when (extract(@z-index-order, @counter) = @elementName) {
+		z-index: @counter * 100 + @delta;
+	}
+}
+
+body {
+	font-size: 2em;
+}
+
+.ui.white.header {
+	color: #fff;
+}
+
+nav.ui.fixed.menu {
+	.zindex('nav');
+}
+
+#index {
+	width: 100vw;
+	height: 300vh;
+	.zindex('index');
+	.bg {
+		position: fixed;
+		.zindex('index', 10);
+		top: 0;
+		width: 100vw;
+		height: 100vh;
+		background: linear-gradient( rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7) ), url('//i.imgur.com/vsrfanN.jpg') no-repeat;
+		background-size: auto 120vh;
+	}
+	.title {
+		position: relative;
+		.zindex('index', 20);
+		display: table-cell;
+		vertical-align: middle;
+		text-align: center;
+		width: 100vw;
+		height: 100vh;
+		color: #fff;
+	}
+	.panda {
+		position: fixed;
+		.zindex('index', 30);
+		img {
+			max-width: 30vw;
+			max-height: 30vh;
+		}
+	}
+	.fox {
+		position: fixed;
+		.zindex('index', 30);
+		img {
+			max-width: 30vw;
+			max-height: 30vh;
+		}
+	}
+}
+
+
+#activities {
+	position: fixed;
+	top: 0;
+	width: 100vw;
+	height: 100vw;
+	.zindex('activities');
+	.activity {
+		position: absolute;
+		&:nth-child(1) {
+			background: linear-gradient( rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7) ), url('//i.imgur.com/un5Zptg.jpg') no-repeat;
+			background-size: 120vw auto;
+		}
+		&:nth-child(2) {
+			background: linear-gradient( rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7) ), url('//i.imgur.com/ZOSkAVJ.jpg') no-repeat;
+			background-size: 120vw auto;
+		}
+		div {
+			height: 100vh;
+			width: 100vw;
+			display: table-cell;
+			vertical-align: middle;
+			text-align: center;
+			&.header {
+			}
+			&.content {
+				position: relative;
+			}
+		}
+	}
+}
