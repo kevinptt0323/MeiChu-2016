@@ -6,6 +6,7 @@ import update from 'react-addons-update';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 
 import AppBar       from 'material-ui/lib/app-bar';
+import CircularProgress from 'material-ui/lib/circular-progress';
 import Colors       from 'material-ui/lib/styles/colors';
 import Dialog       from 'material-ui/lib/dialog';
 import Divider      from 'material-ui/lib/divider';
@@ -127,6 +128,7 @@ export default class Cart extends React.Component {
 	}
 	render() {
 		let checkoutActions = [
+			<CircularProgress mode="indeterminate" size={0.5} style={this.state.sending?{}:{display: "none"}} />,
 			<FlatButton
 				label="送出訂單"
 				disabled={!(this.state.noEmptyInput && !this.state.sending)}
