@@ -8,6 +8,8 @@ import injectTapEventPlugin from 'react-tap-event-plugin';
 import AppBar             from 'material-ui/lib/app-bar';
 import FlatButton         from 'material-ui/lib/flat-button';
 import IconButton         from 'material-ui/lib/icon-button';
+import IconMenu           from 'material-ui/lib/menus/icon-menu';
+import MenuItem           from 'material-ui/lib/menus/menu-item';
 import Table              from 'material-ui/lib/table/table';
 import TableBody          from 'material-ui/lib/table/table-body';
 import TableFooter        from 'material-ui/lib/table/table-footer';
@@ -17,6 +19,7 @@ import TableRow           from 'material-ui/lib/table/table-row';
 import TableRowColumn     from 'material-ui/lib/table/table-row-column';
 
 import Close        from 'material-ui/lib/svg-icons/navigation/close';
+import ExpandMore   from 'material-ui/lib/svg-icons/navigation/expand-more';
 
 const API = {
 	Goods: "/shop/api/goods",
@@ -26,7 +29,7 @@ const API = {
 export default class OrderList extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {orders: [], sending: false};
+		this.state = {orders: [], sending: false, showIndex: 0, showList: true};
 
 		$.ajax({
 			url: props.ordersAPI,
@@ -79,6 +82,9 @@ export default class OrderList extends React.Component {
 			}.bind(this)
 		});
 	}
+  showList(index, e) {
+    this.setState({showIndex: index, showList: true});
+  }
 	delete_(id, index, e) {
 		this.setState({sending: true});
 		let sendData = { id: id, action: "delete" };
@@ -100,6 +106,10 @@ export default class OrderList extends React.Component {
 	}
 	render() {
 		let textCenter = {textAlign: "center"};
+		let getName = good => {
+				let typeStr = good.types.map(type => type.type.name).join(",");
+				return good.good.name + (good.types.length ? "(" + typeStr + ")" : "");
+		};
 		return (
 			<div style={{marginTop: "64px"}}>
 				<Table selectable={false} fixedHeader={true}>
@@ -140,7 +150,18 @@ export default class OrderList extends React.Component {
 										secondary={true}
 										onTouchTap={this.picked.bind(this, order.id, index)} />
 								}</TableRowColumn>
-								<TableRowColumn style={textCenter}>{order.order_goods}</TableRowColumn>
+								<TableRowColumn style={textCenter}>{
+									<IconMenu
+										iconButtonElement={<ExpandMore />}
+										desktop={!this.props.mobile}
+										maxHeight={300}
+										targetOrigin={{horizontal: 'center', vertical: 'top'}}
+										anchorOrigin={{horizontal: 'right', vertical: 'top'}}>
+										{order.goods.map(good => (
+											<MenuItem primaryText={getName(good)} />
+										))}
+									</IconMenu>
+								}</TableRowColumn>
 								<TableRowColumn style={textCenter}>{
 									<FlatButton
 										label="刪除"
