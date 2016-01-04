@@ -130,7 +130,7 @@ export default class OrderList extends React.Component {
 					</TableHeader>
 					<TableBody showRowHover={true}>{
 						this.state.orders.map((order,index) => (
-							<TableRow>
+							<TableRow key={index}>
 								<TableRowColumn style={textCenter}>{order.id}</TableRowColumn>
 								<TableRowColumn style={textCenter}>{order.name}</TableRowColumn>
 								<TableRowColumn style={textCenter}>{order.studentID}</TableRowColumn>
@@ -155,10 +155,10 @@ export default class OrderList extends React.Component {
 										iconButtonElement={<ExpandMore />}
 										desktop={!this.props.mobile}
 										maxHeight={300}
-										targetOrigin={{horizontal: 'center', vertical: 'top'}}
+										targetOrigin={{horizontal: 'right', vertical: 'top'}}
 										anchorOrigin={{horizontal: 'right', vertical: 'top'}}>
-										{order.goods.map(good => (
-											<MenuItem primaryText={getName(good)} />
+										{order.goods.map((good,index) => (
+											<MenuItem key={index} primaryText={getName(good)} />
 										))}
 									</IconMenu>
 								}</TableRowColumn>
