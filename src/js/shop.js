@@ -41,6 +41,8 @@ export default class Cart extends React.Component {
 		this.state = {
 				navOpen: !props.mobile,
 				dialogOpen: false,
+				dialogOpen2: false,
+				result: "",
 				list: [],
 				totalPrice: 0,
 				errorText: {},
@@ -69,11 +71,17 @@ export default class Cart extends React.Component {
 	checkout(e) {
 		this.showDialog();
 	}
-	showDialog(id) {
+	showDialog() {
 		this.setState({dialogOpen: true});
 	}
 	hideDialog() {
 		this.setState({dialogOpen: false});
+	}
+	showDialog2() {
+		this.setState({dialogOpen2: true});
+	}
+	hideDialog2() {
+		this.setState({dialogOpen2: false});
 	}
 	clearList(e) {
 		this.setState({list: [], totalPrice: 0});
@@ -89,10 +97,17 @@ export default class Cart extends React.Component {
 			dataType: 'json',
 			data: JSON.stringify(sendData),
 			success: function(data) {
+				this.clearList();
+				let str = `下單成功！一共是 ${data.data.total} 元。您的訂單編號為 #${data.data.id}。請於時間內至指定地點繳費。`;
+				this.setState({result: str, dialogOpen2: true, dialogOpen: false});
 			}.bind(this),
-			error: function(xhr, status, err) {
-				console.error(status, err.toString());
-			}.bind(this),
+			error: function(data, status, err) {
+				let str = "";
+				try {
+					str = data.responseJSON.message + "。" + data.responseJSON.data.list.join("；");
+				} catch(e) {
+				}
+				this.setState({result: str || "Oops! 看起來出了點錯，請稍後再試。", dialogOpen2: true}); }.bind(this),
 			complete: function(a, b) {
 				this.setState({sending: false});
 			}.bind(this)
@@ -111,7 +126,7 @@ export default class Cart extends React.Component {
 		});
 	}
 	render() {
-		let actions = [
+		let checkoutActions = [
 			<FlatButton
 				label="送出訂單"
 				disabled={!(this.state.noEmptyInput && !this.state.sending)}
@@ -120,6 +135,11 @@ export default class Cart extends React.Component {
 			<FlatButton
 				label="取消"
 				onTouchTap={this.hideDialog.bind(this)} />,
+		];
+		let resultActions = [
+			<FlatButton
+				label="關閉"
+				onTouchTap={this.hideDialog2.bind(this)} />,
 		];
 		return (
 			<SideNav
@@ -145,10 +165,10 @@ export default class Cart extends React.Component {
 				<CartList list={this.state.list} handleRemove={this.remove.bind(this)} />
 				<CartSummary totalPrice={this.state.totalPrice} />
 				<Dialog
-					className="cart-dialog"
+					className="checkout-dialog"
 					title="結帳"
 					width="85%"
-					actions={actions}
+					actions={checkoutActions}
 					open={this.state.dialogOpen}
 					autoScrollBodyContent={true}
 					onRequestClose={this.hideDialog.bind(this)}>
@@ -158,26 +178,40 @@ export default class Cart extends React.Component {
 							fullWidth={true}
 							errorText={this.state.errorText.name||""}
 							floatingLabelText="姓名"
+							defaultValue={this.state.inputData.name}
 							onChange={this._checkEmpty.bind(this, 'name')} />
 						<TextField
 							className="input"
 							fullWidth={true}
 							errorText={this.state.errorText.studentID||""}
 							floatingLabelText="學號"
+							defaultValue={this.state.inputData.studentID}
 							onChange={this._checkEmpty.bind(this, 'studentID')} />
 						<TextField
 							className="input"
 							fullWidth={true}
 							errorText={this.state.errorText.phone||""}
 							floatingLabelText="電話"
+							defaultValue={this.state.inputData.phone}
 							onChange={this._checkEmpty.bind(this, 'phone')} />
 						<TextField
 							className="input"
 							fullWidth={true}
 							errorText={this.state.errorText.email||""}
 							floatingLabelText="email"
+							defaultValue={this.state.inputData.email}
 							onChange={this._checkEmpty.bind(this, 'email')} />
 					</div>
+				</Dialog>
+				<Dialog
+					className="result-dialog"
+					title="交易結果"
+					width="85%"
+					actions={resultActions}
+					open={this.state.dialogOpen2}
+					autoScrollBodyContent={true}
+					onRequestClose={this.hideDialog2.bind(this)}>
+					{this.state.result}
 				</Dialog>
 			</SideNav>
 		);
