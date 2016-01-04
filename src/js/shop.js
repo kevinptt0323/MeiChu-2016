@@ -359,20 +359,29 @@ export default class Goods extends React.Component {
 		obj[id] = update(this.state.typeSelected[id], {$merge: data});
 		this.setState({ typeSelected: update(this.state.typeSelected, {$merge: obj}) });
 	}
+	getSelections(good) {
+		let ret = Object.keys(good.types||{}).map(t_type => (
+			<DropDownMenu
+				key={good.id + "." + t_type}
+				maxHeight={220}
+				value={this.state.typeSelected[good.id][t_type]}
+				onChange={this._onDDChange.bind(this, good.id, t_type)}>
+				{good.types[t_type].map((type,index) => (
+					<MenuItem key={good.id + "." + t_type + "." + index} value={type.id} primaryText={type.type} />
+			))}
+			</DropDownMenu>
+		));
+		if (good.child) {
+			good.child.forEach(id => {
+				ret.push((<span style={{fontSize: ".5em"}}>{this.getGoodByID(id).name}</span>));
+				ret = ret.concat(this.getSelections(this.getGoodByID(id)));
+			});
+		}
+		return ret;
+	}
 	render() {
 		let currGood = this.state.goods.filter(good => (good.id==this.state.showID))[0];
-		let dropdown =
-			Object.keys(currGood.types||{}).map(t_type => (
-				<DropDownMenu
-					key={currGood.id + "." + t_type}
-					maxHeight={220}
-					value={this.state.typeSelected[currGood.id][t_type]}
-					onChange={this._onDDChange.bind(this, currGood.id, t_type)}>
-					{currGood.types[t_type].map((type,index) => (
-						<MenuItem key={currGood.id + "." + t_type + "." + index} value={type.id} primaryText={type.type} />
-				))}
-				</DropDownMenu>
-			));
+		let dropdown = this.getSelections(currGood);
 		let actions = dropdown.concat([
 			<FlatButton
 				label="加入購物車"
