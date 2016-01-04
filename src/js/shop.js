@@ -373,8 +373,12 @@ export default class Goods extends React.Component {
 		));
 		if (good.child) {
 			good.child.forEach(id => {
-				ret.push((<span style={{fontSize: ".5em"}}>{this.getGoodByID(id).name}</span>));
-				ret = ret.concat(this.getSelections(this.getGoodByID(id)));
+				let tmp = this.getGoodByID(id);
+				console.log(tmp);
+				if (tmp.types) {
+					ret.push((<span style={{fontSize: ".5em"}}>{tmp.name}</span>));
+					ret = ret.concat(this.getSelections(tmp));
+				}
 			});
 		}
 		return ret;
@@ -408,14 +412,14 @@ export default class Goods extends React.Component {
 						let cols = 1, rows = 1;
 						let gradientBg = 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)';
 						if (!this.props.mobile) {
-							if ([1, 2].indexOf(good.id)!=-1)
-								rows = cols = 2;
-							if ([5].indexOf(good.id)!=-1)
+							//if ([].indexOf(good.id)!=-1)
+							//	rows = cols = 2;
+							if ([3].indexOf(good.id)!=-1)
 								cols = 2;
-							if ([6].indexOf(good.id)!=-1)
+							if ([4].indexOf(good.id)!=-1)
 								cols = 3;
 						}
-						if ([8].indexOf(good.id)!=-1)
+						if ([6].indexOf(good.id)!=-1)
 							rows = 2;
 						let price = (good.special) ? (
 							<span className="special price">
