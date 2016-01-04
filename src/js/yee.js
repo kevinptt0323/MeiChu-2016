@@ -41,7 +41,7 @@ export default class OrderList extends React.Component {
 			}.bind(this)
 		});
 	}
-	paid(id, e) {
+	paid(id, index, e) {
 		this.setState({sending: true});
 		let sendData = { id: id, action: "paid" };
 		$.ajax({
@@ -51,6 +51,7 @@ export default class OrderList extends React.Component {
 			dataType: 'json',
 			data: JSON.stringify(sendData),
 			success: function(data) {
+				this.setState({ orders: update(this.state.orders, {$splice: [[index, 1, data.data]]}) });
 			}.bind(this),
 			error: function(data, status, err) {
 			}.bind(this),
@@ -80,7 +81,7 @@ export default class OrderList extends React.Component {
 						</TableRow>
 					</TableHeader>
 					<TableBody showRowHover={true}>{
-						this.state.orders.map(order => (
+						this.state.orders.map((order,index) => (
 							<TableRow>
 								<TableRowColumn style={textCenter}>{order.id}</TableRowColumn>
 								<TableRowColumn style={textCenter}>{order.name}</TableRowColumn>
@@ -93,7 +94,7 @@ export default class OrderList extends React.Component {
 									<FlatButton
 										label="登記繳費"
 										secondary={true}
-										onTouchTap={this.paid.bind(this, order.id)} />
+										onTouchTap={this.paid.bind(this, order.id, index)} />
 								}</TableRowColumn>
 								<TableRowColumn style={textCenter}>{order.picked_at}</TableRowColumn>
 								<TableRowColumn style={textCenter}>{order.order_goods}</TableRowColumn>
