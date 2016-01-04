@@ -82,6 +82,15 @@ gulp.task('browserify', function() {
 		}))
 		.pipe(gulp.dest('dist/js'))
 	;
+	gulp.src('src/js/yee.js')
+		.pipe(changed('dist/js'))
+		.pipe(browserify({
+			insertGlobals: true,
+			debug: !gulp.env.production,
+			transform: [babelify]
+		}))
+		.pipe(gulp.dest('dist/js'))
+	;
 });
 
 gulp.task('default', ['web-pages', 'Less', 'libs', 'browserify']);

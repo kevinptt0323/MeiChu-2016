@@ -454,7 +454,7 @@ export default class Goods extends React.Component {
 					autoScrollBodyContent={true}
 					onRequestClose={this.hideDialog.bind(this)}>
 					<div className="flex-box">
-						<div className="flex-item one"> <img src={currGood.src} /> </div>
+						<div className="flex-item one" style={{textAlign: "center"}}> <a href={currGood.src} target="_blank"><img src={currGood.src} /></a><br /> (點擊圖片可以放大)</div>
 						<div className="flex-item one">
 							<div dangerouslySetInnerHTML={{__html: currGood.description}}></div>
 							<div style={{textAlign: "right"}}>售價：{price}</div>
