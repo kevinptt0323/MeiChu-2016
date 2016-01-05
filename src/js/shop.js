@@ -4,6 +4,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import update from 'react-addons-update';
 import injectTapEventPlugin from 'react-tap-event-plugin';
+import ga from 'react-ga';
 
 import AppBar       from 'material-ui/lib/app-bar';
 import CircularProgress from 'material-ui/lib/circular-progress';
@@ -326,6 +327,11 @@ export default class Goods extends React.Component {
 	}
 	showDialog(id, e) {
 		this.setState({open: true, showID: id});
+		ga.event({
+			category: 'Good',
+			action: 'View',
+			value: id
+		});
 		e.stopPropagation();
 	}
 	hideDialog() {
@@ -356,6 +362,11 @@ export default class Goods extends React.Component {
 	_onAddClick(id, e) {
 		this.confirm_queue = [];
 		this._add(this.getGoodByID(id), false);
+		ga.event({
+			category: 'Good',
+			action: 'Add',
+			value: id
+		});
 		e.stopPropagation();
 	}
 	_onDDChange(id, type_group, e, index, value) {
@@ -379,7 +390,6 @@ export default class Goods extends React.Component {
 		if (good.child) {
 			good.child.forEach(id => {
 				let tmp = this.getGoodByID(id);
-				console.log(tmp);
 				if (tmp.types) {
 					ret.push((<span style={{fontSize: ".5em"}}>{tmp.name}</span>));
 					ret = ret.concat(this.getSelections(tmp));
@@ -477,6 +487,10 @@ export default class EasterEgg extends React.Component {
 		this.state = {click: 0};
 	}
 	_onClick(e) {
+		ga.event({
+			category: 'Easter Egg',
+			action: 'Click'
+		});
 		this.setState({click: this.state.click+1}, () => {
 			let str = "";
 			if (this.state.click<13 && this.state.click>=3)
@@ -529,6 +543,8 @@ export default class MyShop extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {mobile: true, open: false, message: ""};
+		ga.initialize('UA-72041916-1');
+		ga.pageview('/shop/');
 	}
 	componentDidMount() {
 		window.addEventListener('resize', this._resize_mixin_callback.bind(this));
