@@ -330,7 +330,7 @@ export default class Goods extends React.Component {
 		ga.event({
 			category: 'Good',
 			action: 'View',
-			label: id
+			label: id.toString()
 		});
 		e.stopPropagation();
 	}
@@ -365,7 +365,7 @@ export default class Goods extends React.Component {
 		ga.event({
 			category: 'Good',
 			action: 'Add',
-			label: id
+			label: id.toString()
 		});
 		e.stopPropagation();
 	}
