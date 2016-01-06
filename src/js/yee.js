@@ -128,7 +128,7 @@ export default class OrderList extends React.Component {
 							<TableHeaderColumn style={textCenter}>刪除</TableHeaderColumn>
 						</TableRow>
 					</TableHeader>
-					<TableBody showRowHover={true}>{
+					<TableBody showRowHover={true} preScanRows={false}>{
 						this.state.orders.map((order,index) => (
 							<TableRow key={index}>
 								<TableRowColumn style={textCenter}>{order.id}</TableRowColumn>
