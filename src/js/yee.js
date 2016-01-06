@@ -26,6 +26,30 @@ const API = {
 	Orders: "/shop/api/orders"
 };
 
+export default class MyTableRow extends React.Component {
+	constructor(props) {
+		super(props);
+	}
+	shouldComponentUpdate(nextProps, nextState) {
+		if ( nextProps.order === null || this.props.order === null
+			|| nextProps.order.id !== this.props.order.id
+			|| nextProps.order.paid_at !== this.props.order.paid_at
+			|| nextProps.order.picked_at !== this.props.order.picked_at
+			|| nextProps.order.deleted_at !== this.props.order.deleted_at) {
+			console.log("rerender");
+			return true;
+		} else
+			return false;
+	}
+	render() {
+		return this.props.order&&!this.props.order.deleted_at ? (
+			<TableRow>{ this.props.children }</TableRow>
+		) : (
+			<TableRow style={{display: "none"}}>{ this.props.children }</TableRow>
+		);
+	}
+}
+
 export default class OrderList extends React.Component {
 	constructor(props) {
 		super(props);
@@ -44,28 +68,9 @@ export default class OrderList extends React.Component {
 			}.bind(this)
 		});
 	}
-	paid(id, index, e) {
+	action(id, index, action, e) {
 		this.setState({sending: true});
-		let sendData = { id: id, action: "paid" };
-		$.ajax({
-			url: this.props.ordersAPI + "/" + id,
-			type: 'post',
-			contentType: "application/json",
-			dataType: 'json',
-			data: JSON.stringify(sendData),
-			success: function(data) {
-				this.setState({ orders: update(this.state.orders, {$splice: [[index, 1, data.data]]}) });
-			}.bind(this),
-			error: function(data, status, err) {
-			}.bind(this),
-			complete: function(a, b) {
-				this.setState({sending: false});
-			}.bind(this)
-		});
-	}
-	picked(id, index, e) {
-		this.setState({sending: true});
-		let sendData = { id: id, action: "picked" };
+		let sendData = { id: id, action: action };
 		$.ajax({
 			url: this.props.ordersAPI + "/" + id,
 			type: 'post',
@@ -85,25 +90,6 @@ export default class OrderList extends React.Component {
   showList(index, e) {
     this.setState({showIndex: index, showList: true});
   }
-	delete_(id, index, e) {
-		this.setState({sending: true});
-		let sendData = { id: id, action: "delete" };
-		$.ajax({
-			url: this.props.ordersAPI + "/" + id,
-			type: 'post',
-			contentType: "application/json",
-			dataType: 'json',
-			data: JSON.stringify(sendData),
-			success: function(data) {
-				this.setState({ orders: update(this.state.orders, {$splice: [[index, 1]]}) });
-			}.bind(this),
-			error: function(data, status, err) {
-			}.bind(this),
-			complete: function(a, b) {
-				this.setState({sending: false});
-			}.bind(this)
-		});
-	}
 	render() {
 		let textCenter = {textAlign: "center"};
 		let getName = good => {
@@ -130,7 +116,7 @@ export default class OrderList extends React.Component {
 					</TableHeader>
 					<TableBody showRowHover={true} preScanRows={false}>{
 						this.state.orders.map((order,index) => (
-							<TableRow key={index}>
+							<MyTableRow key={index} order={order}>
 								<TableRowColumn style={textCenter}>{order.id}</TableRowColumn>
 								<TableRowColumn style={textCenter}>{order.name}</TableRowColumn>
 								<TableRowColumn style={textCenter}>{order.studentID}</TableRowColumn>
@@ -142,13 +128,13 @@ export default class OrderList extends React.Component {
 									<FlatButton
 										label="登記繳費"
 										secondary={true}
-										onTouchTap={this.paid.bind(this, order.id, index)} />
+										onTouchTap={this.action.bind(this, order.id, index, "paid")} />
 								}</TableRowColumn>
 								<TableRowColumn style={textCenter}>{order.picked_at?order.picked_at:
 									<FlatButton
 										label="登記取貨"
 										secondary={true}
-										onTouchTap={this.picked.bind(this, order.id, index)} />
+										onTouchTap={this.action.bind(this, order.id, index, "picked")} />
 								}</TableRowColumn>
 								<TableRowColumn style={textCenter}>{
 									<IconMenu
@@ -166,9 +152,9 @@ export default class OrderList extends React.Component {
 									<FlatButton
 										label="刪除"
 										primary={true}
-										onTouchTap={this.delete_.bind(this, order.id, index)} />
+										onTouchTap={this.action.bind(this, order.id, index, "deleted")} />
 								}</TableRowColumn>
-							</TableRow>
+							</MyTableRow>
 						))
 					}</TableBody>
 				</Table>
