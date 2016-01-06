@@ -2,7 +2,9 @@ var
 	gulp        = require('gulp'),
 	less        = require('gulp-less'),
 	changed     = require('gulp-changed'),
+	rename      = require('gulp-rename'),
 	browserify  = require('gulp-browserify'),
+	uglify      = require('gulp-uglify'),
 	babelify    = require('babelify')
 ;
 
@@ -58,6 +60,7 @@ gulp.task('libs', function() {
 
 gulp.task('browserify', function() {
 	gulp.src('src/js/main.js')
+		.pipe(changed('dist/js'))
 		.pipe(browserify({
 			insertGlobals: true,
 			debug: !gulp.env.production,
@@ -72,25 +75,28 @@ gulp.task('browserify', function() {
 			}
 		}))
 		.pipe(gulp.dest('dist/js'))
-	;
-	gulp.src('src/js/shop.js')
-		.pipe(changed('dist/js'))
-		.pipe(browserify({
-			insertGlobals: true,
-			debug: !gulp.env.production,
-			transform: [babelify]
+		.pipe(uglify())
+		.pipe(rename({
+			extname: '.min.js'
 		}))
 		.pipe(gulp.dest('dist/js'))
 	;
-	gulp.src('src/js/yee.js')
-		.pipe(changed('dist/js'))
-		.pipe(browserify({
-			insertGlobals: true,
-			debug: !gulp.env.production,
-			transform: [babelify]
-		}))
-		.pipe(gulp.dest('dist/js'))
-	;
+	['src/js/shop.js', 'src/js/yee.js'].forEach(path => {
+		gulp.src(path)
+			.pipe(changed('dist/js'))
+			.pipe(browserify({
+				insertGlobals: true,
+				debug: !gulp.env.production,
+				transform: [babelify]
+			}))
+			.pipe(gulp.dest('dist/js'))
+			.pipe(uglify())
+			.pipe(rename({
+				extname: '.min.js'
+			}))
+			.pipe(gulp.dest('dist/js'))
+		;
+	});
 });
 
 gulp.task('default', ['web-pages', 'Less', 'libs', 'browserify']);
