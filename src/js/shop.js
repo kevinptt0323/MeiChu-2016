@@ -4,6 +4,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import update from 'react-addons-update';
 import injectTapEventPlugin from 'react-tap-event-plugin';
+import ga from 'react-ga';
 
 import AppBar       from 'material-ui/lib/app-bar';
 import CircularProgress from 'material-ui/lib/circular-progress';
@@ -26,6 +27,7 @@ import RaisedButton from 'material-ui/lib/raised-button';
 import TextField    from 'material-ui/lib/text-field';
 
 import Close        from 'material-ui/lib/svg-icons/navigation/close';
+import MenuIcon     from 'material-ui/lib/svg-icons/navigation/menu';
 import MoreVert     from 'material-ui/lib/svg-icons/navigation/more-vert';
 import ContentAdd   from 'material-ui/lib/svg-icons/content/add';
 import ContentClear from 'material-ui/lib/svg-icons/content/clear';
@@ -144,6 +146,7 @@ export default class Cart extends React.Component {
 				label="關閉"
 				onTouchTap={this.hideDialog2.bind(this)} />,
 		];
+		let closeButton = (<IconButton onTouchTap={this.toggle.bind(this, null)}><Close /></IconButton>);
 		return (
 			<SideNav
 				width={300}
@@ -151,7 +154,7 @@ export default class Cart extends React.Component {
 				docked={!this.props.mobile}
 				onRequestChange={navOpen => this.setState({navOpen})}>
 				<AppBar
-					iconElementLeft={<IconButton onTouchTap={this.toggle.bind(this, null)}><Close /></IconButton>}
+					iconElementLeft={this.props.mobile?closeButton:(<div></div>)}
 					iconElementRight={
 						<IconMenu
 							iconButtonElement={
@@ -324,6 +327,11 @@ export default class Goods extends React.Component {
 	}
 	showDialog(id, e) {
 		this.setState({open: true, showID: id});
+		ga.event({
+			category: 'Good',
+			action: 'View',
+			label: id.toString()
+		});
 		e.stopPropagation();
 	}
 	hideDialog() {
@@ -354,6 +362,11 @@ export default class Goods extends React.Component {
 	_onAddClick(id, e) {
 		this.confirm_queue = [];
 		this._add(this.getGoodByID(id), false);
+		ga.event({
+			category: 'Good',
+			action: 'Add',
+			label: id.toString()
+		});
 		e.stopPropagation();
 	}
 	_onDDChange(id, type_group, e, index, value) {
@@ -377,7 +390,6 @@ export default class Goods extends React.Component {
 		if (good.child) {
 			good.child.forEach(id => {
 				let tmp = this.getGoodByID(id);
-				console.log(tmp);
 				if (tmp.types) {
 					ret.push((<span style={{fontSize: ".5em"}}>{tmp.name}</span>));
 					ret = ret.concat(this.getSelections(tmp));
@@ -469,10 +481,70 @@ export default class Goods extends React.Component {
 	}
 }
 
+export default class EasterEgg extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {click: 0};
+	}
+	_onClick(e) {
+		ga.event({
+			category: 'Easter Egg',
+			action: 'Click'
+		});
+		this.setState({click: this.state.click+1}, () => {
+			let str = "";
+			if (this.state.click<13 && this.state.click>=3)
+				str = "聽說再按 " + (13-this.state.click) + " 次，就會出現隱藏商品";
+			else if (this.state.click==13)
+				str = "你還真的按這麼多次啊";
+			else if (this.state.click==14)
+				str = "別再按了啦";
+			else if (this.state.click==15)
+				str = "真的沒東西了";
+			else if (this.state.click==20)
+				str = "你真的很無聊...";
+			else if (this.state.click==21)
+				str = "叫你別再按了";
+			else if (this.state.click==22)
+				str = "快買東西吧";
+			else if (this.state.click==23)
+				str = "掰掰";
+			else if (this.state.click>40&&this.state.click<48)
+				str = "...";
+			else if (this.state.click==48)
+				str = "究竟有多少人像你這麼無聊";
+			else if (this.state.click==49)
+				str = "就一直玩這個沒用的按鈕";
+			else if (this.state.click==50)
+				str = "竟然按了50次";
+			else if (this.state.click==51)
+				str = "或是像我一樣";
+			else if (this.state.click==52)
+				str = "寫了這個沒用的按鈕";
+			else if (this.state.click==53)
+				str = "去靠北交大 Po 文算了XD";
+			else if (this.state.click==54)
+				str = "快買東西吧";
+			else if (this.state.click==55)
+				str = "掰掰";
+			this.props.handleMessage(str);
+		});
+	}
+	render() {
+		return (
+			<IconButton onTouchTap={this._onClick.bind(this)}>
+				<MenuIcon color="white" />
+			</IconButton>
+		);
+	}
+}
+
 export default class MyShop extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {mobile: true, open: false, message: ""};
+		ga.initialize('UA-72041916-1');
+		ga.pageview('/shop/');
 	}
 	componentDidMount() {
 		window.addEventListener('resize', this._resize_mixin_callback.bind(this));
@@ -495,8 +567,6 @@ export default class MyShop extends React.Component {
 	showSnackBar(message) {
 		if (message) {
 			this.setState({open: true, message: message});
-		} else {
-			this.setState({open: true});
 		}
 	}
 	_handleSBClose(e) {
@@ -508,6 +578,7 @@ export default class MyShop extends React.Component {
 				<Cart ref="cart" ordersAPI={API.Orders} mobile={this.state.mobile} />
 				<div className="content">
 					<AppBar
+						iconElementLeft={<EasterEgg handleMessage={this.showSnackBar.bind(this)} />}
 						iconElementRight={<IconButton onTouchTap={this.toggleCart.bind(this)}><ShoppingCart /></IconButton>}
 						title="梅後商城"
 						style={{position: "fixed"}}
