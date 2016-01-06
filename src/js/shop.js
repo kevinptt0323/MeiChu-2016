@@ -4,6 +4,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import update from 'react-addons-update';
 import injectTapEventPlugin from 'react-tap-event-plugin';
+import ga from 'react-ga';
 
 import AppBar       from 'material-ui/lib/app-bar';
 import CircularProgress from 'material-ui/lib/circular-progress';
@@ -21,10 +22,12 @@ import ListItem     from 'material-ui/lib/lists/list-item';
 import MenuItem     from 'material-ui/lib/menus/menu-item';
 import Paper        from 'material-ui/lib/paper';
 import SideNav      from 'material-ui/lib/left-nav';
+import Snackbar     from 'material-ui/lib/snackbar';
 import RaisedButton from 'material-ui/lib/raised-button';
 import TextField    from 'material-ui/lib/text-field';
 
 import Close        from 'material-ui/lib/svg-icons/navigation/close';
+import MenuIcon     from 'material-ui/lib/svg-icons/navigation/menu';
 import MoreVert     from 'material-ui/lib/svg-icons/navigation/more-vert';
 import ContentAdd   from 'material-ui/lib/svg-icons/content/add';
 import ContentClear from 'material-ui/lib/svg-icons/content/clear';
@@ -143,6 +146,7 @@ export default class Cart extends React.Component {
 				label="關閉"
 				onTouchTap={this.hideDialog2.bind(this)} />,
 		];
+		let closeButton = (<IconButton onTouchTap={this.toggle.bind(this, null)}><Close /></IconButton>);
 		return (
 			<SideNav
 				width={300}
@@ -150,7 +154,7 @@ export default class Cart extends React.Component {
 				docked={!this.props.mobile}
 				onRequestChange={navOpen => this.setState({navOpen})}>
 				<AppBar
-					iconElementLeft={<IconButton onTouchTap={this.toggle.bind(this, null)}><Close /></IconButton>}
+					iconElementLeft={this.props.mobile?closeButton:(<div></div>)}
 					iconElementRight={
 						<IconMenu
 							iconButtonElement={
@@ -242,7 +246,7 @@ export default class CartList extends React.Component {
 				</div>
 			);
 			let getName = (good) => {
-				let typeStr = Object.keys(good.typeSelected||{}).map(t_type => good.types[t_type].filter(tt => tt.id==good.typeSelected[t_type])[0].type).join(",");
+				let typeStr = Object.keys(good.typeSelected||{}).map(type_group => good.types[type_group].filter(tt => tt.id==good.typeSelected[type_group])[0].name).join(",");
 				return good.name + (typeStr.length ? "(" + typeStr + ")" : "");
 			}
 			if (good.childObj) {
@@ -321,8 +325,14 @@ export default class Goods extends React.Component {
 		let ret = this.state.goods.filter(good => (good.id==id));
 		return ret ? ret[0] : {};
 	}
-	showDialog(id) {
+	showDialog(id, e) {
 		this.setState({open: true, showID: id});
+		ga.event({
+			category: 'Good',
+			action: 'View',
+			label: id.toString()
+		});
+		e.stopPropagation();
 	}
 	hideDialog() {
 		this.setState({open: false});
@@ -345,36 +355,41 @@ export default class Goods extends React.Component {
 				func = this._confirm.bind(this, this.confirm_queue.pop(), func);
 			}
 			func();
+			this.props.handleMessage("已加入購物車");
 		}
 		return toAdd;
 	}
 	_onAddClick(id, e) {
 		this.confirm_queue = [];
 		this._add(this.getGoodByID(id), false);
+		ga.event({
+			category: 'Good',
+			action: 'Add',
+			label: id.toString()
+		});
 		e.stopPropagation();
 	}
-	_onDDChange(id, t_type, e, index, value) {
+	_onDDChange(id, type_group, e, index, value) {
 		let obj = {}, data = {};
-		data[t_type] = value;
+		data[type_group] = value;
 		obj[id] = update(this.state.typeSelected[id], {$merge: data});
 		this.setState({ typeSelected: update(this.state.typeSelected, {$merge: obj}) });
 	}
 	getSelections(good) {
-		let ret = Object.keys(good.types||{}).map(t_type => (
+		let ret = Object.keys(good.types||{}).map(type_group => (
 			<DropDownMenu
-				key={good.id + "." + t_type}
+				key={good.id + "." + type_group}
 				maxHeight={220}
-				value={this.state.typeSelected[good.id][t_type]}
-				onChange={this._onDDChange.bind(this, good.id, t_type)}>
-				{good.types[t_type].map((type,index) => (
-					<MenuItem key={good.id + "." + t_type + "." + index} value={type.id} primaryText={type.type} />
+				value={this.state.typeSelected[good.id][type_group]}
+				onChange={this._onDDChange.bind(this, good.id, type_group)}>
+				{good.types[type_group].map((type,index) => (
+					<MenuItem key={good.id + "." + type_group + "." + index} value={type.id} primaryText={type.name} />
 			))}
 			</DropDownMenu>
 		));
 		if (good.child) {
 			good.child.forEach(id => {
 				let tmp = this.getGoodByID(id);
-				console.log(tmp);
 				if (tmp.types) {
 					ret.push((<span style={{fontSize: ".5em"}}>{tmp.name}</span>));
 					ret = ret.concat(this.getSelections(tmp));
@@ -454,7 +469,7 @@ export default class Goods extends React.Component {
 					autoScrollBodyContent={true}
 					onRequestClose={this.hideDialog.bind(this)}>
 					<div className="flex-box">
-						<div className="flex-item one"> <img src={currGood.src} /> </div>
+						<div className="flex-item one" style={{textAlign: "center"}}> <a href={currGood.src} target="_blank"><img src={currGood.src} /></a><br /> (點擊圖片可以放大)</div>
 						<div className="flex-item one">
 							<div dangerouslySetInnerHTML={{__html: currGood.description}}></div>
 							<div style={{textAlign: "right"}}>售價：{price}</div>
@@ -466,10 +481,70 @@ export default class Goods extends React.Component {
 	}
 }
 
+export default class EasterEgg extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {click: 0};
+	}
+	_onClick(e) {
+		ga.event({
+			category: 'Easter Egg',
+			action: 'Click'
+		});
+		this.setState({click: this.state.click+1}, () => {
+			let str = "";
+			if (this.state.click<13 && this.state.click>=3)
+				str = "聽說再按 " + (13-this.state.click) + " 次，就會出現隱藏商品";
+			else if (this.state.click==13)
+				str = "你還真的按這麼多次啊";
+			else if (this.state.click==14)
+				str = "別再按了啦";
+			else if (this.state.click==15)
+				str = "真的沒東西了";
+			else if (this.state.click==20)
+				str = "你真的很無聊...";
+			else if (this.state.click==21)
+				str = "叫你別再按了";
+			else if (this.state.click==22)
+				str = "快買東西吧";
+			else if (this.state.click==23)
+				str = "掰掰";
+			else if (this.state.click>40&&this.state.click<48)
+				str = "...";
+			else if (this.state.click==48)
+				str = "究竟有多少人像你這麼無聊";
+			else if (this.state.click==49)
+				str = "就一直玩這個沒用的按鈕";
+			else if (this.state.click==50)
+				str = "竟然按了50次";
+			else if (this.state.click==51)
+				str = "或是像我一樣";
+			else if (this.state.click==52)
+				str = "寫了這個沒用的按鈕";
+			else if (this.state.click==53)
+				str = "去靠北交大 Po 文算了XD";
+			else if (this.state.click==54)
+				str = "快買東西吧";
+			else if (this.state.click==55)
+				str = "掰掰";
+			this.props.handleMessage(str);
+		});
+	}
+	render() {
+		return (
+			<IconButton onTouchTap={this._onClick.bind(this)}>
+				<MenuIcon color="white" />
+			</IconButton>
+		);
+	}
+}
+
 export default class MyShop extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {mobile: true};
+		this.state = {mobile: true, open: false, message: ""};
+		ga.initialize('UA-72041916-1');
+		ga.pageview('/shop/');
 	}
 	componentDidMount() {
 		window.addEventListener('resize', this._resize_mixin_callback.bind(this));
@@ -489,14 +564,40 @@ export default class MyShop extends React.Component {
 	addToCart(good, typeSelected, e) {
 		this.refs.cart.add(good, typeSelected);
 	}
+	showSnackBar(message) {
+		if (message) {
+			this.setState({open: true, message: message});
+		}
+	}
+	_handleSBClose(e) {
+		this.setState({open: false});
+	}
 	render() {
 		return (
 			<div>
 				<Cart ref="cart" ordersAPI={API.Orders} mobile={this.state.mobile} />
 				<div className="content">
-					<AppBar iconElementRight={<IconButton onTouchTap={this.toggleCart.bind(this)}><ShoppingCart /></IconButton>} title="梅後商城" style={{position: "fixed"}} />
-					<Goods className="Goods" goodsAPI={API.Goods} handleAdd={this.addToCart.bind(this)} mobile={this.state.mobile} />
+					<AppBar
+						iconElementLeft={<EasterEgg handleMessage={this.showSnackBar.bind(this)} />}
+						iconElementRight={<IconButton onTouchTap={this.toggleCart.bind(this)}><ShoppingCart /></IconButton>}
+						title="梅後商城"
+						style={{position: "fixed"}}
+						/>
+					<Goods
+						className="Goods"
+						goodsAPI={API.Goods}
+						handleAdd={this.addToCart.bind(this)}
+						handleMessage={this.showSnackBar.bind(this)}
+						mobile={this.state.mobile}
+						/>
 				</div>
+				<Snackbar
+					open={this.state.open}
+					message={this.state.message}
+					action="x"
+					autoHideDuration={3000}
+					onRequestClose={this._handleSBClose.bind(this)}
+				/>
 			</div>
 		);
 	}
