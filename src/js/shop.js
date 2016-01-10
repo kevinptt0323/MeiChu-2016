@@ -32,6 +32,7 @@ import MoreVert     from 'material-ui/lib/svg-icons/navigation/more-vert';
 import ContentAdd   from 'material-ui/lib/svg-icons/content/add';
 import ContentClear from 'material-ui/lib/svg-icons/content/clear';
 import ShoppingCart from 'material-ui/lib/svg-icons/action/shopping-cart';
+import ViewCompact  from 'material-ui/lib/svg-icons/image/view-compact';
 
 const API = {
 	Goods: "/shop/api/goods",
@@ -546,10 +547,13 @@ export default class EasterEgg extends React.Component {
 	}
 }
 
+let FacebookIcon = (<svg viewBox="0 0 24 24"><path d="M17,2V2H17V6H15C14.31,6 14,6.81 14,7.5V10H14L17,10V14H14V22H10V14H7V10H10V6A4,4 0 0,1 14,2H17Z" /></svg>);
+let GithubIcon = (<svg viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z" /></svg>);
+
 export default class MyShop extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {mobile: true, open: false, message: ""};
+		this.state = {mobile: true, open: false, navOpen: false, message: ""};
 		ga.initialize('UA-72041916-1');
 		ga.pageview('/shop/');
 	}
@@ -568,6 +572,9 @@ export default class MyShop extends React.Component {
 	toggleCart(e) {
 		this.refs.cart.toggle(null, e);
 	}
+	toggleSideNav(e) {
+		this.setState({navOpen: !this.state.navOpen});
+	}
 	addToCart(good, typeSelected, e) {
 		this.refs.cart.add(good, typeSelected);
 	}
@@ -584,7 +591,31 @@ export default class MyShop extends React.Component {
 			<div>
 				<Cart ref="cart" ordersAPI={API.Orders} mobile={this.state.mobile} />
 				<div className="content">
+					<SideNav
+						width={300}
+						open={this.state.navOpen}
+						docked={false}
+						onRequestChange={navOpen => this.setState({navOpen})}>
+						<img src="/img/sidenav-wallpaper.png" style={{width: "100%"}} />
+						<MenuItem leftIcon={<ViewCompact />}>商品瀏覽</MenuItem>
+						<Divider />
+						<MenuItem
+							leftIcon={FacebookIcon}
+							linkButton={true}
+							href="https://fb.me/nctu.meichu"
+							target="_blank">
+							Facebook 粉絲專頁
+						</MenuItem>
+						<MenuItem
+							leftIcon={GithubIcon}
+							linkButton={true}
+							href="https://github.com/kevinptt0323/MeiChu-2016"
+							target="_blank">
+							View on Github
+						</MenuItem>
+					</SideNav>
 					<AppBar
+						className="appbar"
 						iconElementLeft={<EasterEgg handleMessage={this.showSnackBar.bind(this)} />}
 						iconElementRight={<IconButton onTouchTap={this.toggleCart.bind(this)}><ShoppingCart /></IconButton>}
 						title="梅後商城"
