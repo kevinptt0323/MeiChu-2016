@@ -38,6 +38,13 @@ const API = {
 	Orders: "/shop/api/orders"
 };
 
+const logo_srcs = [
+	'/img/logo-chinatimes.png',
+	'/img/logo-chison.jpg',
+	'/img/logo-jdc_jeol.png',
+	'/img/logo-sis.jpg'
+];
+
 
 export default class Cart extends React.Component {
 	constructor(props) {
@@ -581,7 +588,7 @@ export default class MyShop extends React.Component {
 						iconElementLeft={<EasterEgg handleMessage={this.showSnackBar.bind(this)} />}
 						iconElementRight={<IconButton onTouchTap={this.toggleCart.bind(this)}><ShoppingCart /></IconButton>}
 						title="梅後商城"
-						style={{position: "fixed"}}
+						style={{position: "fixed", top: 0}}
 						/>
 					<Goods
 						className="Goods"
@@ -590,6 +597,13 @@ export default class MyShop extends React.Component {
 						handleMessage={this.showSnackBar.bind(this)}
 						mobile={this.state.mobile}
 						/>
+					<Paper style={{marginTop: 20, textAlign: "center"}} zDepth={1}>{
+						logo_srcs.map(src => (
+							<div style={{display: "inline-block"}}>
+								<img src={src} style={{width: 100, margin: "20px", verticalAlign: "middle"}} />
+							</div>
+						))
+					}</Paper>
 				</div>
 				<Snackbar
 					open={this.state.open}
