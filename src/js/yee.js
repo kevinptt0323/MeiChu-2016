@@ -22,8 +22,10 @@ import Close        from 'material-ui/lib/svg-icons/navigation/close';
 import ExpandMore   from 'material-ui/lib/svg-icons/navigation/expand-more';
 
 const API = {
+	login: "/shop/api/login",
 	Goods: "/shop/api/goods",
-	Orders: "/shop/api/orders"
+	Orders: "/shop/api/orders",
+	Auth: "?token=$token"
 };
 
 export default class MyTableRow extends React.Component {
@@ -54,15 +56,21 @@ export default class OrderList extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {orders: [], sending: false, showIndex: 0, showList: true};
-
+	}
+	componentWillReceiveProps(nextProps) {
+		if (this.props.ordersAPI != nextProps.ordersAPI || this.props.auth != nextProps.auth) {
+			this.refresh(nextProps.ordersAPI + nextProps.auth);
+		}
+	}
+	refresh(url) {
+		url = url ? url : this.props.ordersAPI + this.props.auth;
 		$.ajax({
-			url: props.ordersAPI,
+			url: url,
 			dataType: 'json',
 			success: function(data) {
 				this.setState({orders: data.data});
 			}.bind(this),
 			error: function(xhr, status, err) {
-				//console.error(this.props.resultUrl, status, err.toString());
 			}.bind(this),
 			complete: function(a, b) {
 			}.bind(this)
@@ -72,7 +80,7 @@ export default class OrderList extends React.Component {
 		this.setState({sending: true});
 		let sendData = { id: id, action: action };
 		$.ajax({
-			url: this.props.ordersAPI + "/" + id,
+			url: this.props.ordersAPI + "/" + id + this.props.auth,
 			type: 'post',
 			contentType: "application/json",
 			dataType: 'json',
@@ -87,9 +95,9 @@ export default class OrderList extends React.Component {
 			}.bind(this)
 		});
 	}
-  showList(index, e) {
-    this.setState({showIndex: index, showList: true});
-  }
+	showList(index, e) {
+		this.setState({showIndex: index, showList: true});
+	}
 	render() {
 		let textCenter = {textAlign: "center"};
 		let getName = good => {
@@ -166,7 +174,23 @@ export default class OrderList extends React.Component {
 export default class MyShopAdmin extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {mobile: true};
+		this.state = {mobile: true, ordersAPI: API.Orders, auth: ""};
+
+		$.ajax({
+			url: API.login,
+			type: 'post',
+			contentType: "application/json",
+			dataType: 'json',
+			data: JSON.stringify({password: "meichu_ZOOb"}),
+			success: function(data) {
+				this.setState({auth: API.Auth.replace('$token', data.token)});
+			}.bind(this),
+			error: function(data, status, err) {
+			}.bind(this),
+			complete: function(a, b) {
+				this.setState({sending: false});
+			}.bind(this)
+		});
 	}
 	componentDidMount() {
 		window.addEventListener('resize', this._resize_mixin_callback.bind(this));
@@ -184,7 +208,7 @@ export default class MyShopAdmin extends React.Component {
 		return (
 			<div>
 				<AppBar title="梅後商城管理系統" style={{position: "fixed", top: "0"}} />
-				<OrderList ordersAPI={API.Orders} mobile={this.state.mobile} />
+				<OrderList ordersAPI={this.state.ordersAPI} auth={this.state.auth} mobile={this.state.mobile} />
 			</div>
 		);
 	}
