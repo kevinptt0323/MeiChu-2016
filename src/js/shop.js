@@ -7,6 +7,9 @@ import injectTapEventPlugin from 'react-tap-event-plugin';
 import ga from 'react-ga';
 
 import AppBar       from 'material-ui/lib/app-bar';
+import Card         from 'material-ui/lib/card/card';
+import CardText     from 'material-ui/lib/card/card-text';
+import CardTitle    from 'material-ui/lib/card/card-title';
 import CircularProgress from 'material-ui/lib/circular-progress';
 import Colors       from 'material-ui/lib/styles/colors';
 import Dialog       from 'material-ui/lib/dialog';
@@ -616,11 +619,21 @@ export default class MyShop extends React.Component {
 					</SideNav>
 					<AppBar
 						className="appbar"
-						iconElementLeft={<EasterEgg handleMessage={this.showSnackBar.bind(this)} />}
+						onLeftIconButtonTouchTap={this.toggleSideNav.bind(this)}
 						iconElementRight={<IconButton onTouchTap={this.toggleCart.bind(this)}><ShoppingCart /></IconButton>}
 						title="梅後商城"
 						style={{position: "fixed", top: 0}}
 						/>
+					<Card>
+						<CardTitle title="丙申梅竹紀念商品預購&繳費延長時間囉！！！" />
+						<Divider />
+						<CardText>
+							<p>時間：<br />
+							1/11(一)、1/12(二) 中午&晚餐時間 in 二餐 (←只有一個地方！)<br />
+							1/13(三) 中午 in 二餐</p>
+							<p>如果是網路訂購的同學，要在攤位繳費後才算完成預購喔！</p>
+						</CardText>
+					</Card>
 					<Goods
 						className="Goods"
 						goodsAPI={API.Goods}
