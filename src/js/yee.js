@@ -22,33 +22,65 @@ import Close        from 'material-ui/lib/svg-icons/navigation/close';
 import ExpandMore   from 'material-ui/lib/svg-icons/navigation/expand-more';
 
 const API = {
+	login: "/shop/api/login",
 	Goods: "/shop/api/goods",
-	Orders: "/shop/api/orders"
+	Orders: "/shop/api/orders",
+	Auth: "?token=$token"
 };
+
+export default class MyTableRow extends React.Component {
+	constructor(props) {
+		super(props);
+	}
+	shouldComponentUpdate(nextProps, nextState) {
+		if ( nextProps.order === null || this.props.order === null
+			|| nextProps.order.id !== this.props.order.id
+			|| nextProps.order.paid_at !== this.props.order.paid_at
+			|| nextProps.order.picked_at !== this.props.order.picked_at
+			|| nextProps.order.deleted_at !== this.props.order.deleted_at) {
+			console.log("rerender");
+			return true;
+		} else
+			return false;
+	}
+	render() {
+		return this.props.order&&!this.props.order.deleted_at ? (
+			<TableRow>{ this.props.children }</TableRow>
+		) : (
+			<TableRow style={{display: "none"}}>{ this.props.children }</TableRow>
+		);
+	}
+}
 
 export default class OrderList extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {orders: [], sending: false, showIndex: 0, showList: true};
-
+	}
+	componentWillReceiveProps(nextProps) {
+		if (this.props.ordersAPI != nextProps.ordersAPI || this.props.auth != nextProps.auth) {
+			this.refresh(nextProps.ordersAPI + nextProps.auth);
+		}
+	}
+	refresh(url) {
+		url = url ? url : this.props.ordersAPI + this.props.auth;
 		$.ajax({
-			url: props.ordersAPI,
+			url: url,
 			dataType: 'json',
 			success: function(data) {
 				this.setState({orders: data.data});
 			}.bind(this),
 			error: function(xhr, status, err) {
-				//console.error(this.props.resultUrl, status, err.toString());
 			}.bind(this),
 			complete: function(a, b) {
 			}.bind(this)
 		});
 	}
-	paid(id, index, e) {
+	action(id, index, action, e) {
 		this.setState({sending: true});
-		let sendData = { id: id, action: "paid" };
+		let sendData = { id: id, action: action };
 		$.ajax({
-			url: this.props.ordersAPI + "/" + id,
+			url: this.props.ordersAPI + "/" + id + this.props.auth,
 			type: 'post',
 			contentType: "application/json",
 			dataType: 'json',
@@ -63,46 +95,8 @@ export default class OrderList extends React.Component {
 			}.bind(this)
 		});
 	}
-	picked(id, index, e) {
-		this.setState({sending: true});
-		let sendData = { id: id, action: "picked" };
-		$.ajax({
-			url: this.props.ordersAPI + "/" + id,
-			type: 'post',
-			contentType: "application/json",
-			dataType: 'json',
-			data: JSON.stringify(sendData),
-			success: function(data) {
-				this.setState({ orders: update(this.state.orders, {$splice: [[index, 1, data.data]]}) });
-			}.bind(this),
-			error: function(data, status, err) {
-			}.bind(this),
-			complete: function(a, b) {
-				this.setState({sending: false});
-			}.bind(this)
-		});
-	}
-  showList(index, e) {
-    this.setState({showIndex: index, showList: true});
-  }
-	delete_(id, index, e) {
-		this.setState({sending: true});
-		let sendData = { id: id, action: "delete" };
-		$.ajax({
-			url: this.props.ordersAPI + "/" + id,
-			type: 'post',
-			contentType: "application/json",
-			dataType: 'json',
-			data: JSON.stringify(sendData),
-			success: function(data) {
-				this.setState({ orders: update(this.state.orders, {$splice: [[index, 1]]}) });
-			}.bind(this),
-			error: function(data, status, err) {
-			}.bind(this),
-			complete: function(a, b) {
-				this.setState({sending: false});
-			}.bind(this)
-		});
+	showList(index, e) {
+		this.setState({showIndex: index, showList: true});
 	}
 	render() {
 		let textCenter = {textAlign: "center"};
@@ -130,7 +124,7 @@ export default class OrderList extends React.Component {
 					</TableHeader>
 					<TableBody showRowHover={true} preScanRows={false}>{
 						this.state.orders.map((order,index) => (
-							<TableRow key={index}>
+							<MyTableRow key={index} order={order}>
 								<TableRowColumn style={textCenter}>{order.id}</TableRowColumn>
 								<TableRowColumn style={textCenter}>{order.name}</TableRowColumn>
 								<TableRowColumn style={textCenter}>{order.studentID}</TableRowColumn>
@@ -142,13 +136,13 @@ export default class OrderList extends React.Component {
 									<FlatButton
 										label="登記繳費"
 										secondary={true}
-										onTouchTap={this.paid.bind(this, order.id, index)} />
+										onTouchTap={this.action.bind(this, order.id, index, "paid")} />
 								}</TableRowColumn>
 								<TableRowColumn style={textCenter}>{order.picked_at?order.picked_at:
 									<FlatButton
 										label="登記取貨"
 										secondary={true}
-										onTouchTap={this.picked.bind(this, order.id, index)} />
+										onTouchTap={this.action.bind(this, order.id, index, "picked")} />
 								}</TableRowColumn>
 								<TableRowColumn style={textCenter}>{
 									<IconMenu
@@ -166,9 +160,9 @@ export default class OrderList extends React.Component {
 									<FlatButton
 										label="刪除"
 										primary={true}
-										onTouchTap={this.delete_.bind(this, order.id, index)} />
+										onTouchTap={this.action.bind(this, order.id, index, "deleted")} />
 								}</TableRowColumn>
-							</TableRow>
+							</MyTableRow>
 						))
 					}</TableBody>
 				</Table>
@@ -180,7 +174,23 @@ export default class OrderList extends React.Component {
 export default class MyShopAdmin extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {mobile: true};
+		this.state = {mobile: true, ordersAPI: API.Orders, auth: ""};
+
+		$.ajax({
+			url: API.login,
+			type: 'post',
+			contentType: "application/json",
+			dataType: 'json',
+			data: JSON.stringify({password: "meichu_ZOOb"}),
+			success: function(data) {
+				this.setState({auth: API.Auth.replace('$token', data.token)});
+			}.bind(this),
+			error: function(data, status, err) {
+			}.bind(this),
+			complete: function(a, b) {
+				this.setState({sending: false});
+			}.bind(this)
+		});
 	}
 	componentDidMount() {
 		window.addEventListener('resize', this._resize_mixin_callback.bind(this));
@@ -198,7 +208,7 @@ export default class MyShopAdmin extends React.Component {
 		return (
 			<div>
 				<AppBar title="梅後商城管理系統" style={{position: "fixed", top: "0"}} />
-				<OrderList ordersAPI={API.Orders} mobile={this.state.mobile} />
+				<OrderList ordersAPI={this.state.ordersAPI} auth={this.state.auth} mobile={this.state.mobile} />
 			</div>
 		);
 	}
