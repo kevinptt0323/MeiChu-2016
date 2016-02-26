@@ -17,9 +17,12 @@ import TableHeader        from 'material-ui/lib/table/table-header';
 import TableHeaderColumn  from 'material-ui/lib/table/table-header-column';
 import TableRow           from 'material-ui/lib/table/table-row';
 import TableRowColumn     from 'material-ui/lib/table/table-row-column';
+import TextField          from 'material-ui/lib/text-field';
+import Colors             from 'material-ui/lib/styles/colors';
 
 import Close        from 'material-ui/lib/svg-icons/navigation/close';
 import ExpandMore   from 'material-ui/lib/svg-icons/navigation/expand-more';
+import Search       from 'material-ui/lib/svg-icons/action/search';
 
 const API = {
 	login: "/shop/api/login",
@@ -28,26 +31,60 @@ const API = {
 	Auth: "?token=$token"
 };
 
+export default class MySearchBar extends React.Component {
+	constructor(props) {
+		super(props);
+		this.handleSearchClick = this.handleSearchClick.bind(this);
+
+		this.state = {
+			focus: false
+		};
+	}
+	handleSearchClick() {
+		this.setState({focus: true});
+	}
+	render() {
+		let {props} = this;
+		return this.state.focus ? (
+			<TextField {...props} />
+		) : (
+			<IconButton onTouchTap={this.handleSearchClick}><Search /></IconButton>
+		);
+	}
+}
+
 export default class MyTableRow extends React.Component {
 	constructor(props) {
 		super(props);
+
+		this.state = {display: this.getDisplay(props)};
+	}
+	getDisplay({filter, order}) {
+		let display = order && !order.deleted_at;
+		const {name, studentID, phone} = order;
+		if ( display && filter!='' ) {
+			display = display && (name.indexOf(filter)!=-1 || studentID.indexOf(filter)!=-1 || phone.indexOf(filter)!=-1);
+		}
+		return display;
+	}
+	componentWillReceiveProps(nextProps) {
+		this.setState({display: this.getDisplay(nextProps)});
 	}
 	shouldComponentUpdate(nextProps, nextState) {
+		if ( nextState.display !== this.state.display ) return true;
+		if ( nextState.display === false ) return false;
 		if ( nextProps.order === null || this.props.order === null
 			|| nextProps.order.id !== this.props.order.id
 			|| nextProps.order.paid_at !== this.props.order.paid_at
 			|| nextProps.order.picked_at !== this.props.order.picked_at
-			|| nextProps.order.deleted_at !== this.props.order.deleted_at) {
-			console.log("rerender");
+			|| nextProps.order.deleted_at !== this.props.order.deleted_at)
 			return true;
-		} else
+		else
 			return false;
 	}
 	render() {
-		return this.props.order&&!this.props.order.deleted_at ? (
-			<TableRow>{ this.props.children }</TableRow>
-		) : (
-			<TableRow style={{display: "none"}}>{ this.props.children }</TableRow>
+		return (
+			<TableRow className={this.state.display?"":"hide"}>{ this.props.children }</TableRow>
 		);
 	}
 }
@@ -107,9 +144,9 @@ export default class OrderList extends React.Component {
 		return (
 			<div style={{marginTop: "64px"}}>
 				<Table selectable={false} fixedHeader={true}>
-					<TableHeader>
+					<TableHeader displaySelectAll={false} adjustForCheckbox={false}>
 						<TableRow>
-							<TableHeaderColumn style={textCenter}>訂單編號</TableHeaderColumn>
+							<TableHeaderColumn style={textCenter}>No.</TableHeaderColumn>
 							<TableHeaderColumn style={textCenter}>姓名</TableHeaderColumn>
 							<TableHeaderColumn style={textCenter}>學號</TableHeaderColumn>
 							<TableHeaderColumn style={textCenter}>手機</TableHeaderColumn>
@@ -118,13 +155,16 @@ export default class OrderList extends React.Component {
 							<TableHeaderColumn style={textCenter}>下單時間</TableHeaderColumn>
 							<TableHeaderColumn style={textCenter}>繳費時間</TableHeaderColumn>
 							<TableHeaderColumn style={textCenter}>領貨時間</TableHeaderColumn>
-							<TableHeaderColumn style={textCenter}>購買商品</TableHeaderColumn>
+							<TableHeaderColumn style={textCenter}>商品</TableHeaderColumn>
 							<TableHeaderColumn style={textCenter}>刪除</TableHeaderColumn>
 						</TableRow>
 					</TableHeader>
-					<TableBody showRowHover={true} preScanRows={false}>{
+					<TableBody
+						showRowHover={true}
+						displayRowCheckbox={false}
+						preScanRows={false}>{
 						this.state.orders.map((order,index) => (
-							<MyTableRow key={index} order={order}>
+							<MyTableRow key={index} order={order} filter={this.props.filter}>
 								<TableRowColumn style={textCenter}>{order.id}</TableRowColumn>
 								<TableRowColumn style={textCenter}>{order.name}</TableRowColumn>
 								<TableRowColumn style={textCenter}>{order.studentID}</TableRowColumn>
@@ -174,7 +214,8 @@ export default class OrderList extends React.Component {
 export default class MyShopAdmin extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {mobile: true, ordersAPI: API.Orders, auth: ""};
+		this.state = {mobile: true, ordersAPI: API.Orders, auth: "", filter: ''};
+		this.onSearchChange = this.onSearchChange.bind(this);
 
 		$.ajax({
 			url: API.login,
@@ -204,11 +245,26 @@ export default class MyShopAdmin extends React.Component {
 	componentWillUnmount() {
 		window.removeEventListener('resize', this._resize_mixin_callback.bind(this));
 	}
+	onSearchChange(e) {
+		this.setState({filter: e.target.value});
+	}
 	render() {
+		let {state} = this;
 		return (
 			<div>
-				<AppBar title="梅後商城管理系統" style={{position: "fixed", top: "0"}} />
-				<OrderList ordersAPI={this.state.ordersAPI} auth={this.state.auth} mobile={this.state.mobile} />
+				<AppBar
+					title="梅後商城管理系統"
+					iconElementRight={
+						<MySearchBar
+							hintText="搜尋"
+							underlineStyle={{borderColor: Colors.cyan400}}
+							underlineFocusStyle={{borderColor: Colors.cyan50}}
+							onChange={this.onSearchChange}
+							/>
+					}
+					style={{position: "fixed", top: "0"}}
+					/>
+				<OrderList {...state} />
 			</div>
 		);
 	}
