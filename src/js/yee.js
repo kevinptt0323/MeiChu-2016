@@ -107,9 +107,9 @@ export default class OrderList extends React.Component {
 		return (
 			<div style={{marginTop: "64px"}}>
 				<Table selectable={false} fixedHeader={true}>
-					<TableHeader>
+					<TableHeader displaySelectAll={false} adjustForCheckbox={false}>
 						<TableRow>
-							<TableHeaderColumn style={textCenter}>訂單編號</TableHeaderColumn>
+							<TableHeaderColumn style={textCenter}>No.</TableHeaderColumn>
 							<TableHeaderColumn style={textCenter}>姓名</TableHeaderColumn>
 							<TableHeaderColumn style={textCenter}>學號</TableHeaderColumn>
 							<TableHeaderColumn style={textCenter}>手機</TableHeaderColumn>
@@ -118,11 +118,14 @@ export default class OrderList extends React.Component {
 							<TableHeaderColumn style={textCenter}>下單時間</TableHeaderColumn>
 							<TableHeaderColumn style={textCenter}>繳費時間</TableHeaderColumn>
 							<TableHeaderColumn style={textCenter}>領貨時間</TableHeaderColumn>
-							<TableHeaderColumn style={textCenter}>購買商品</TableHeaderColumn>
+							<TableHeaderColumn style={textCenter}>商品</TableHeaderColumn>
 							<TableHeaderColumn style={textCenter}>刪除</TableHeaderColumn>
 						</TableRow>
 					</TableHeader>
-					<TableBody showRowHover={true} preScanRows={false}>{
+					<TableBody
+						showRowHover={true}
+						displayRowCheckbox={false}
+						preScanRows={false}>{
 						this.state.orders.map((order,index) => (
 							<MyTableRow key={index} order={order}>
 								<TableRowColumn style={textCenter}>{order.id}</TableRowColumn>
