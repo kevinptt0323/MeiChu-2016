@@ -56,29 +56,35 @@ export default class MySearchBar extends React.Component {
 export default class MyTableRow extends React.Component {
 	constructor(props) {
 		super(props);
+
+		this.state = {display: this.getDisplay(props)};
+	}
+	getDisplay({filter, order}) {
+		let display = order && !order.deleted_at;
+		const {name, studentID, phone} = order;
+		if ( display && filter!='' ) {
+			display = display && (name.indexOf(filter)!=-1 || studentID.indexOf(filter)!=-1 || phone.indexOf(filter)!=-1);
+		}
+		return display;
+	}
+	componentWillReceiveProps(nextProps) {
+		this.setState({display: this.getDisplay(nextProps)});
 	}
 	shouldComponentUpdate(nextProps, nextState) {
+		if ( nextState.display !== this.state.display ) return true;
+		if ( nextState.display === false ) return false;
 		if ( nextProps.order === null || this.props.order === null
-			|| nextProps.filter !== this.props.filter
 			|| nextProps.order.id !== this.props.order.id
 			|| nextProps.order.paid_at !== this.props.order.paid_at
 			|| nextProps.order.picked_at !== this.props.order.picked_at
-			|| nextProps.order.deleted_at !== this.props.order.deleted_at) {
+			|| nextProps.order.deleted_at !== this.props.order.deleted_at)
 			return true;
-		} else
+		else
 			return false;
 	}
 	render() {
-		let display = this.props.order && !this.props.order.deleted_at;
-		const {name, studentID, phone} = this.props.order;
-		const {filter} = this.props;
-		if ( filter!='' ) {
-			display = display && (name.indexOf(filter)!=-1 || studentID.indexOf(filter)!=-1 || phone.indexOf(filter)!=-1);
-		}
-		return display ? (
-			<TableRow>{ this.props.children }</TableRow>
-		) : (
-			<TableRow style={{display: "none"}}>{ this.props.children }</TableRow>
+		return (
+			<TableRow className={this.state.display?"":"hide"}>{ this.props.children }</TableRow>
 		);
 	}
 }
